@@ -56,7 +56,7 @@ export const COPY: Record<Lang, Copy> = {
       sub: 'Una selecció · 2024–2025',
       rowSuffix: 'visita la web',
       items: [
-        { name: 'Neutral Estudio', tag: 'Estudi · Web', yr: '2025', url: 'https://neutralestudio.es' },
+        { name: 'Neutral Design', tag: 'Estudi · Web', yr: '2025', url: 'https://neutraldesign.es' },
         { name: 'Estudi Dental Carrera', tag: 'Marca · Web', yr: '2025', url: 'https://estudi-dental-carrera.vercel.app' },
         { name: 'PalSec Agency', tag: 'Marca · Web', yr: '2025', url: 'https://www.palsec.agency' },
         { name: 'Global Fisio', tag: 'Marca · Web', yr: '2024', url: 'https://global-fisio.vercel.app' },
@@ -129,7 +129,7 @@ export const COPY: Record<Lang, Copy> = {
       sub: 'A selection · 2024–2025',
       rowSuffix: 'visit site',
       items: [
-        { name: 'Neutral Estudio', tag: 'Studio · Web', yr: '2025', url: 'https://neutralestudio.es' },
+        { name: 'Neutral Design', tag: 'Studio · Web', yr: '2025', url: 'https://neutraldesign.es' },
         { name: 'Estudi Dental Carrera', tag: 'Brand · Web', yr: '2025', url: 'https://estudi-dental-carrera.vercel.app' },
         { name: 'PalSec Agency', tag: 'Brand · Web', yr: '2025', url: 'https://www.palsec.agency' },
         { name: 'Global Fisio', tag: 'Brand · Web', yr: '2024', url: 'https://global-fisio.vercel.app' },
