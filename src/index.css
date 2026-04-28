@@ -195,14 +195,17 @@ body {
   50% { opacity: 0.35; transform: scale(0.6); }
 }
 
-/* Scenes — stacked, only one visible at a time, driven by GSAP */
+/* Scenes — stacked, only one visible at a time, driven by GSAP.
+   Lives in the 1fr middle row of the overlay grid so it can never
+   overlap the topbar or botbar. */
 .scenes {
-  position: absolute;
-  inset: 0;
+  position: relative;
   display: grid;
   place-items: center;
   z-index: 2;
   pointer-events: none;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .scene {
@@ -213,6 +216,7 @@ body {
   place-items: center;
   opacity: 0;
   will-change: opacity, transform;
+  overflow: hidden;
 }
 
 .scene__inner {
@@ -653,8 +657,10 @@ body {
   .botbar__counter b { font-size: 32px; }
   .botbar__hint { gap: 6px; }
 
-  /* On mobile, scenes anchor to top so tall content (Practice) doesn't
-     overflow up into the topbar. */
-  .scenes { align-items: start; }
-  .scene { align-items: start; padding-top: 12px; }
+  /* Compact services on mobile so it fits the middle row */
+  .s-services { gap: 14px; }
+  .s-services__cell { padding: 12px; gap: 6px; }
+  .s-services__cell h3 { font-size: 14px; line-height: 1.2; }
+  .s-services__cell ul { font-size: 11px; }
+  .s-services__cell .idx { font-size: 10px; }
 }
