@@ -2,19 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Scene3D, { type Scene3DHandle } from './Scene3D'
+import { COPY, type Lang } from './copy'
 
 gsap.registerPlugin(ScrollTrigger)
 
-const SCENE_LABELS = [
-  'Inici',
-  'Manifest',
-  'Projectes',
-  'Cita',
-  'Servei',
-  'Contacte',
-]
+type Theme = 'night' | 'day'
 
-const TOTAL = SCENE_LABELS.length
+const TOTAL = 6
 
 export default function App() {
   const proxyRef = useRef<HTMLDivElement>(null)
@@ -29,6 +23,17 @@ export default function App() {
 
   const [booting, setBooting] = useState(true)
   const [bootCount, setBootCount] = useState(0)
+  const [lang, setLang] = useState<Lang>('ca')
+  const [theme, setTheme] = useState<Theme>('night')
+
+  const t = COPY[lang]
+  const sceneLabelsRef = useRef(t.sceneLabels)
+  sceneLabelsRef.current = t.sceneLabels
+
+  useEffect(() => {
+    document.documentElement.lang = lang
+    document.documentElement.dataset.theme = theme
+  }, [lang, theme])
 
   useEffect(() => {
     const obj = { v: 0 }
@@ -53,8 +58,6 @@ export default function App() {
       gsap.set(sceneRefs.current, { opacity: 0, y: 24 })
       gsap.set(sceneRefs.current[0], { opacity: 1, y: 0 })
 
-      const total = TOTAL
-
       const tl = gsap.timeline({
         scrollTrigger: {
           scroller: proxy,
@@ -68,18 +71,18 @@ export default function App() {
             if (progressBarRef.current) {
               progressBarRef.current.style.width = `${p * 100}%`
             }
-            const idx = Math.min(Math.floor(p * total), total - 1)
+            const idx = Math.min(Math.floor(p * TOTAL), TOTAL - 1)
             if (counterNumRef.current) {
               counterNumRef.current.textContent = String(idx + 1).padStart(2, '0')
             }
             if (sceneLabelRef.current) {
-              sceneLabelRef.current.textContent = SCENE_LABELS[idx]
+              sceneLabelRef.current.textContent = sceneLabelsRef.current[idx]
             }
           },
         },
       })
 
-      for (let i = 0; i < total - 1; i++) {
+      for (let i = 0; i < TOTAL - 1; i++) {
         const a = sceneRefs.current[i]
         const b = sceneRefs.current[i + 1]
         tl.to(
@@ -99,11 +102,13 @@ export default function App() {
     return () => ctx.revert()
   }, [booting])
 
+  const toggleTheme = () => setTheme((th) => (th === 'night' ? 'day' : 'night'))
+
   return (
     <>
       <div className={`boot ${!booting ? 'hidden' : ''}`} aria-hidden={!booting}>
         <div className="boot__inner">
-          <div style={{ opacity: 0.6 }}>PalSec WebLab — Carregant</div>
+          <div style={{ opacity: 0.6 }}>{t.bootLabel}</div>
           <div className="boot__count">{String(bootCount).padStart(3, '0')}</div>
         </div>
       </div>
@@ -114,7 +119,7 @@ export default function App() {
 
       <div className="stage">
         <div className="stage__canvas">
-          <Scene3D ref={sceneRef} />
+          <Scene3D ref={sceneRef} theme={theme} />
         </div>
 
         <div className="stage__scrim" aria-hidden />
@@ -124,32 +129,54 @@ export default function App() {
             <div className="topbar__mark">
               PalSec WebLab<span>.</span>
             </div>
-            <nav className="topbar__nav">
-              <span>Inici</span>
-              <span>Projectes</span>
-              <span>Servei</span>
-              <span>Contacte</span>
-            </nav>
-            <div>Un departament de PalSec Agency</div>
+
+            <div className="topbar__tag">{t.topbarTagline}</div>
+
+            <div className="topbar__controls">
+              <div className="seg" role="group" aria-label="Language">
+                <button
+                  className={`seg__btn ${lang === 'ca' ? 'is-on' : ''}`}
+                  onClick={() => setLang('ca')}
+                  aria-pressed={lang === 'ca'}
+                >
+                  CA
+                </button>
+                <button
+                  className={`seg__btn ${lang === 'en' ? 'is-on' : ''}`}
+                  onClick={() => setLang('en')}
+                  aria-pressed={lang === 'en'}
+                >
+                  EN
+                </button>
+              </div>
+              <button
+                className="theme-btn"
+                onClick={toggleTheme}
+                aria-label={theme === 'night' ? t.toggles.theme.day : t.toggles.theme.night}
+                title={theme === 'night' ? t.toggles.theme.day : t.toggles.theme.night}
+              >
+                <span className="theme-btn__icon" aria-hidden>
+                  {theme === 'night' ? '☀' : '☾'}
+                </span>
+                <span className="theme-btn__label">
+                  {theme === 'night' ? t.toggles.theme.day : t.toggles.theme.night}
+                </span>
+              </button>
+            </div>
           </header>
 
           <div className="scenes">
             <section className="scene" ref={sceneEls(0)}>
               <div className="scene__inner s-title">
-                <div className="s-title__eyebrow">Un projecte de PalSec Agcy.</div>
+                <div className="s-title__eyebrow">{t.title.eyebrow}</div>
                 <h1 className="s-title__h">
-                  PalSec<i>,</i> dissenyem<br />
-                  webs que es <i>recorden</i><br />
-                  més enllà del scroll.
+                  {t.title.h.l1}<br />
+                  <i>{t.title.h.l2}</i><br />
+                  {t.title.h.l3}
                 </h1>
                 <div className="s-title__sub">
-                  <p>
-                    Som el WebLab de PalSec Agency: un equip dedicat exclusivament al
-                    disseny i desenvolupament de llocs web a mida — amb cura per la
-                    tipografia, el ritme i els detalls que fan que una web sembli un
-                    objecte i no una plantilla.
-                  </p>
-                  <small>PalSec Agency · WebLab</small>
+                  <p>{t.title.sub}</p>
+                  <small>{t.title.smallTag}</small>
                 </div>
               </div>
             </section>
@@ -157,39 +184,28 @@ export default function App() {
             <section className="scene" ref={sceneEls(1)}>
               <div className="scene__inner s-manifesto">
                 <div className="s-manifesto__label">
-                  <span>Manifest</span>
-                  <b>§ 01 / 06</b>
+                  <span>{t.manifesto.label}</span>
+                  <b>{t.manifesto.section}</b>
                 </div>
-                <h2 className="s-manifesto__h">
-                  No fem webs que <em>reaccionen</em> — fem webs que
-                  <em> responen</em>. Amb pes, amb temps, amb la mena de
-                  cura que fa pensar que algú s'hi ha <em>preocupat</em>.
-                </h2>
+                <h2 className="s-manifesto__h">{t.manifesto.h}</h2>
               </div>
             </section>
 
             <section className="scene" ref={sceneEls(2)}>
               <div className="scene__inner s-works">
                 <div className="s-works__head">
-                  <h2>Projectes Seleccionats</h2>
-                  <span>Una mostra del nostre treball</span>
+                  <h2>{t.works.head}</h2>
+                  <span>{t.works.sub}</span>
                 </div>
                 <div className="s-works__list">
-                  {[
-                    ['Marbre & Mà', 'Identitat', '2026'],
-                    ['Folio Press', 'Editorial · Web', '2025'],
-                    ['Halcyon Àudio', 'Marca · Producte', '2025'],
-                    ['Nord Co.', 'Web · 3D', '2024'],
-                    ['Tipografia No. 7', 'Identitat', '2024'],
-                    ['Estudis Cendra', 'Motion · Marca', '2023'],
-                  ].map(([name, tag, yr], i) => (
-                    <div className="s-works__row" key={name}>
+                  {t.works.items.map((p, i) => (
+                    <div className="s-works__row" key={p.name}>
                       <span className="num">{String(i + 1).padStart(2, '0')}</span>
                       <span className="name">
-                        {name} <i>— un estudi</i>
+                        {p.name} <i>{t.works.rowSuffix}</i>
                       </span>
-                      <span className="tag">{tag}</span>
-                      <span className="yr">{yr}</span>
+                      <span className="tag">{p.tag}</span>
+                      <span className="yr">{p.yr}</span>
                     </div>
                   ))}
                 </div>
@@ -199,37 +215,20 @@ export default function App() {
             <section className="scene" ref={sceneEls(3)}>
               <div className="scene__inner s-quote">
                 <blockquote>
-                  &laquo;Una bona web no demana atenció. <span>Se la guanya, a
-                  poc a poc, per ser digna d'una segona mirada.&raquo;</span>
+                  «{t.quote.open} <span>{t.quote.close}»</span>
                 </blockquote>
-                <cite>— Apunt d'estudi Núm. 14</cite>
+                <cite>{t.quote.cite}</cite>
               </div>
             </section>
 
             <section className="scene" ref={sceneEls(4)}>
               <div className="scene__inner s-services">
                 <h2 className="s-services__h">
-                  Servei
-                  <em>El que fem, en paraules clares</em>
+                  {t.services.h}
+                  <em>{t.services.sub}</em>
                 </h2>
                 <div className="s-services__grid">
-                  {[
-                    {
-                      n: '01',
-                      h: 'Webs corporatives fetes per durar més enllà del llançament',
-                      list: ['Estratègia', 'Disseny UX/UI', 'Art direction', 'Copy'],
-                    },
-                    {
-                      n: '02',
-                      h: 'Desenvolupament a mida amb codi propi i net',
-                      list: ['Frontend', 'CMS', 'Headless', 'Integracions'],
-                    },
-                    {
-                      n: '03',
-                      h: 'Detall en moviment: animació, 3D i interacció',
-                      list: ['Three.js', 'Motion', 'Micro-interaccions', 'Performance'],
-                    },
-                  ].map((s) => (
+                  {t.services.cells.map((s) => (
                     <div className="s-services__cell" key={s.n}>
                       <div className="idx">{s.n}</div>
                       <h3>{s.h}</h3>
@@ -247,25 +246,29 @@ export default function App() {
             <section className="scene" ref={sceneEls(5)}>
               <div className="scene__inner s-contact">
                 <h2 className="s-contact__h">
-                  Tens un projecte?<br />
-                  <u>Comencem</u> a parlar-ne.
+                  {t.contact.h.l1}<br />
+                  {t.contact.h.l2pre}
+                  <u>{t.contact.h.l2under}</u>
+                  {t.contact.h.l2post}
                 </h2>
                 <div className="s-contact__grid">
                   <div className="s-contact__col">
-                    <span>Correu</span>
+                    <span>{t.contact.cols.email}</span>
                     <a href="mailto:info@palsec.agency">info@palsec.agency</a>
                   </div>
                   <div className="s-contact__col">
-                    <span>Agència</span>
-                    <a href="https://www.palsec.agency" target="_blank" rel="noopener noreferrer">www.palsec.agency</a>
+                    <span>{t.contact.cols.agency}</span>
+                    <a href="https://www.palsec.agency" target="_blank" rel="noopener noreferrer">
+                      www.palsec.agency
+                    </a>
                   </div>
                   <div className="s-contact__col">
-                    <span>Departament</span>
-                    <p>WebLab — PalSec Agency</p>
+                    <span>{t.contact.cols.dept}</span>
+                    <p>{t.contact.deptValue}</p>
                   </div>
                   <div className="s-contact__col">
-                    <span>Seu</span>
-                    <p>Catalunya</p>
+                    <span>{t.contact.cols.hq}</span>
+                    <p>{t.contact.hqValue}</p>
                   </div>
                 </div>
               </div>
@@ -276,11 +279,11 @@ export default function App() {
             <div className="botbar__counter">
               <b ref={counterNumRef}>01</b>
               <em>/ 06 —</em>
-              <em ref={sceneLabelRef}>Inici</em>
+              <em ref={sceneLabelRef}>{t.sceneLabels[0]}</em>
             </div>
             <div className="botbar__hint">
               <span className="dot" />
-              Desplaça per avançar
+              {t.scrollHint}
             </div>
           </footer>
         </div>

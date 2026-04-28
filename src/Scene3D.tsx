@@ -8,8 +8,10 @@ export type Scene3DHandle = {
   setProgress: (t: number) => void
 }
 
+type Theme = 'night' | 'day'
+
 type RigProps = { progressRef: React.MutableRefObject<number> }
-type SculptProps = RigProps & { lite: boolean }
+type SculptProps = RigProps & { lite: boolean; theme: Theme }
 
 const WAYPOINTS: Array<{ pos: [number, number, number]; look: [number, number, number] }> = [
   { pos: [0, 0, 6.5], look: [0, 0, 0] },
@@ -182,13 +184,17 @@ function BokehField({ progressRef, lite }: SculptProps) {
   )
 }
 
-// Gradient backdrop shader — replaces the flat black background with a
-// warm, cinematic radial gradient + subtle red glow + film grain.
-function Backdrop() {
+// Gradient backdrop shader. Two palettes (night / day) crossfaded with a
+// uniform so the scene transitions smoothly when the user toggles theme.
+function Backdrop({ theme }: { theme: Theme }) {
   const matRef = useRef<THREE.ShaderMaterial>(null!)
-  useFrame((state) => {
+  const targetMix = theme === 'day' ? 1 : 0
+  useFrame((state, delta) => {
     if (matRef.current) {
       matRef.current.uniforms.uTime.value = state.clock.elapsedTime
+      const cur = matRef.current.uniforms.uMix.value as number
+      const k = 1 - Math.pow(0.001, delta * 0.6)
+      matRef.current.uniforms.uMix.value = cur + (targetMix - cur) * k
     }
   })
   return (
@@ -198,7 +204,7 @@ function Backdrop() {
         ref={matRef}
         depthWrite={false}
         depthTest={false}
-        uniforms={{ uTime: { value: 0 } }}
+        uniforms={{ uTime: { value: 0 }, uMix: { value: targetMix } }}
         vertexShader={`
           varying vec2 vUv;
           void main() {
@@ -209,6 +215,7 @@ function Backdrop() {
         fragmentShader={`
           varying vec2 vUv;
           uniform float uTime;
+          uniform float uMix;
 
           float hash(vec2 p) {
             return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
@@ -219,28 +226,38 @@ function Backdrop() {
             uv.x *= 1.6;
             float r = length(uv);
 
-            // Base gradient: warm dark center → deeper espresso edges
-            vec3 inner = vec3(0.135, 0.095, 0.085);
-            vec3 outer = vec3(0.045, 0.030, 0.025);
+            // ---- Night palette ----
+            vec3 nInner = vec3(0.135, 0.095, 0.085);
+            vec3 nOuter = vec3(0.045, 0.030, 0.025);
+            vec3 nGlow  = vec3(0.92, 0.18, 0.14);
+            vec3 nRim   = vec3(0.95, 0.55, 0.30);
+
+            // ---- Day palette ----
+            vec3 dInner = vec3(0.985, 0.965, 0.935);
+            vec3 dOuter = vec3(0.910, 0.870, 0.825);
+            vec3 dGlow  = vec3(0.96, 0.55, 0.50);
+            vec3 dRim   = vec3(1.00, 0.85, 0.70);
+
+            vec3 inner = mix(nInner, dInner, uMix);
+            vec3 outer = mix(nOuter, dOuter, uMix);
+            vec3 glowC = mix(nGlow, dGlow, uMix);
+            vec3 rimC  = mix(nRim, dRim, uMix);
+
             vec3 col = mix(inner, outer, smoothstep(0.0, 0.85, r));
 
-            // Soft red glow behind the logo
-            float glow = exp(-r * 3.2) * 0.55;
-            col += vec3(0.92, 0.18, 0.14) * glow;
+            float glow = exp(-r * 3.2) * mix(0.55, 0.35, uMix);
+            col += glowC * glow;
 
-            // Off-axis amber rim highlight, very subtle
             vec2 rimUv = vUv - vec2(0.78, 0.32);
             rimUv.x *= 1.4;
-            float rim = exp(-length(rimUv) * 4.5) * 0.22;
-            col += vec3(0.95, 0.55, 0.30) * rim;
+            float rim = exp(-length(rimUv) * 4.5) * mix(0.22, 0.18, uMix);
+            col += rimC * rim;
 
-            // Film grain — kept very low so it reads as texture, not noise
             float n = hash(vUv * 1024.0 + floor(uTime * 8.0));
             col += (n - 0.5) * 0.010;
 
-            // Edge vignette
             float v = smoothstep(0.55, 1.05, r);
-            col *= 1.0 - v * 0.55;
+            col *= 1.0 - v * mix(0.55, 0.18, uMix);
 
             gl_FragColor = vec4(col, 1.0);
           }
@@ -250,7 +267,7 @@ function Backdrop() {
   )
 }
 
-function Sculpture({ progressRef, lite }: SculptProps) {
+function Sculpture({ progressRef, lite, theme }: SculptProps) {
   const logoGroup = useRef<THREE.Group>(null!)
   const ring = useRef<THREE.Mesh>(null!)
 
@@ -275,7 +292,7 @@ function Sculpture({ progressRef, lite }: SculptProps) {
 
   return (
     <group>
-      <Backdrop />
+      <Backdrop theme={theme} />
 
       {/* PalSec logo — red glass */}
       <Float speed={1.2} rotationIntensity={0.3} floatIntensity={0.5}>
@@ -325,7 +342,7 @@ function Sculpture({ progressRef, lite }: SculptProps) {
       </mesh>
 
       {/* Cinematic bokeh orbs */}
-      <BokehField progressRef={progressRef} lite={lite} />
+      <BokehField progressRef={progressRef} lite={lite} theme={theme} />
     </group>
   )
 }
@@ -347,7 +364,9 @@ function useIsLite() {
   return lite
 }
 
-const Scene3D = forwardRef<Scene3DHandle>((_, ref) => {
+type Scene3DProps = { theme: Theme }
+
+const Scene3D = forwardRef<Scene3DHandle, Scene3DProps>(({ theme }, ref) => {
   const progressRef = useRef(0)
   const lite = useIsLite()
 
@@ -365,20 +384,18 @@ const Scene3D = forwardRef<Scene3DHandle>((_, ref) => {
       frameloop="always"
       style={{ background: 'transparent' }}
     >
-      <color attach="background" args={['#100806']} />
-      {/* Soft, mostly diffuse lighting — avoid saturated red lights that
-          create harsh red/black contrast on the transmission material. */}
-      <ambientLight intensity={lite ? 0.75 : 0.6} color="#ffe6cc" />
-      <directionalLight position={[3, 4, 4]} intensity={0.9} color="#fff0d8" />
-      <directionalLight position={[-3, 1, 2]} intensity={0.5} color="#ffd0b0" />
-      <pointLight position={[0, 0, 5]} intensity={0.4} color="#ffd9b8" />
+      <color attach="background" args={[theme === 'day' ? '#f4ece0' : '#100806']} />
+      <ambientLight intensity={theme === 'day' ? 1.0 : (lite ? 0.75 : 0.6)} color={theme === 'day' ? '#fff7e8' : '#ffe6cc'} />
+      <directionalLight position={[3, 4, 4]} intensity={theme === 'day' ? 1.4 : 0.9} color={theme === 'day' ? '#ffffff' : '#fff0d8'} />
+      <directionalLight position={[-3, 1, 2]} intensity={theme === 'day' ? 0.7 : 0.5} color={theme === 'day' ? '#ffe8d4' : '#ffd0b0'} />
+      <pointLight position={[0, 0, 5]} intensity={theme === 'day' ? 0.6 : 0.4} color={theme === 'day' ? '#ffeed6' : '#ffd9b8'} />
 
       <Suspense fallback={null}>
-        <Sculpture progressRef={progressRef} lite={lite} />
+        <Sculpture progressRef={progressRef} lite={lite} theme={theme} />
       </Suspense>
       <Rig progressRef={progressRef} />
 
-      <Environment preset={lite ? 'sunset' : 'warehouse'} />
+      <Environment preset={theme === 'day' ? 'apartment' : (lite ? 'sunset' : 'warehouse')} />
     </Canvas>
   )
 })
