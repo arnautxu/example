@@ -104,6 +104,15 @@ export default function App() {
 
   const toggleTheme = () => setTheme((th) => (th === 'night' ? 'day' : 'night'))
 
+  // Wheel events on clickable elements (works rows, contact links) don't
+  // bubble to the .scroll-proxy because those elements live above it. Forward
+  // them manually so the page keeps advancing while the cursor is over a link.
+  const forwardWheel = (e: React.WheelEvent<HTMLElement>) => {
+    if (proxyRef.current) {
+      proxyRef.current.scrollTop += e.deltaY
+    }
+  }
+
   return (
     <>
       <div className={`boot ${!booting ? 'hidden' : ''}`} aria-hidden={!booting}>
@@ -204,14 +213,21 @@ export default function App() {
                 </div>
                 <div className="s-works__list">
                   {t.works.items.map((p, i) => (
-                    <div className="s-works__row" key={p.name}>
+                    <a
+                      className="s-works__row"
+                      key={p.name}
+                      href={p.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onWheel={forwardWheel}
+                    >
                       <span className="num">{String(i + 1).padStart(2, '0')}</span>
                       <span className="name">
                         {p.name} <i>{t.works.rowSuffix}</i>
                       </span>
                       <span className="tag">{p.tag}</span>
-                      <span className="yr">{p.yr}</span>
-                    </div>
+                      <span className="yr">{p.yr}<span className="arrow" aria-hidden> ↗</span></span>
+                    </a>
                   ))}
                 </div>
               </div>
@@ -259,11 +275,16 @@ export default function App() {
                 <div className="s-contact__grid">
                   <div className="s-contact__col">
                     <span>{t.contact.cols.email}</span>
-                    <a href="mailto:info@palsec.agency">info@palsec.agency</a>
+                    <a href="mailto:info@palsec.agency" onWheel={forwardWheel}>info@palsec.agency</a>
                   </div>
                   <div className="s-contact__col">
                     <span>{t.contact.cols.agency}</span>
-                    <a href="https://www.palsec.agency" target="_blank" rel="noopener noreferrer">
+                    <a
+                      href="https://www.palsec.agency"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onWheel={forwardWheel}
+                    >
                       www.palsec.agency
                     </a>
                   </div>

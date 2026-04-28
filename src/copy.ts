@@ -1,6 +1,6 @@
 export type Lang = 'ca' | 'en'
 
-type Project = { name: string; tag: string; yr: string }
+type Project = { name: string; tag: string; yr: string; url: string }
 type Service = { n: string; h: string; list: string[] }
 
 export type Copy = {
@@ -50,14 +50,12 @@ export const COPY: Record<Lang, Copy> = {
     works: {
       head: 'Projectes Seleccionats',
       sub: 'Una mostra del nostre treball',
-      rowSuffix: '— un estudi',
+      rowSuffix: '— visita la web',
       items: [
-        { name: 'Marbre & Mà', tag: 'Identitat', yr: '2026' },
-        { name: 'Folio Press', tag: 'Editorial · Web', yr: '2025' },
-        { name: 'Halcyon Àudio', tag: 'Marca · Producte', yr: '2025' },
-        { name: 'Nord Co.', tag: 'Web · 3D', yr: '2024' },
-        { name: 'Tipografia No. 7', tag: 'Identitat', yr: '2024' },
-        { name: 'Estudis Cendra', tag: 'Motion · Marca', yr: '2023' },
+        { name: 'Estudi Dental Carrera', tag: 'Salut · Web', yr: '2025', url: 'https://estudi-dental-carrera.vercel.app' },
+        { name: 'PalSec Agency', tag: 'Marca · Web', yr: '2025', url: 'https://www.palsec.agency' },
+        { name: 'Global Fisio', tag: 'Salut · Web', yr: '2024', url: 'https://global-fisio.vercel.app' },
+        { name: 'I-Pediatria', tag: 'Pediatria · Web', yr: '2024', url: 'https://i-pediatria.vercel.app' },
       ],
     },
     quote: {
@@ -103,14 +101,12 @@ export const COPY: Record<Lang, Copy> = {
     works: {
       head: 'Selected Works',
       sub: 'A selection of our work',
-      rowSuffix: '— a study',
+      rowSuffix: '— visit site',
       items: [
-        { name: 'Marble & Hand', tag: 'Identity', yr: '2026' },
-        { name: 'Folio Press', tag: 'Editorial · Web', yr: '2025' },
-        { name: 'Halcyon Audio', tag: 'Brand · Product', yr: '2025' },
-        { name: 'Northbound Co.', tag: 'Site · 3D', yr: '2024' },
-        { name: 'Type Atelier No. 7', tag: 'Identity', yr: '2024' },
-        { name: 'Cinder Studios', tag: 'Motion · Brand', yr: '2023' },
+        { name: 'Estudi Dental Carrera', tag: 'Healthcare · Web', yr: '2025', url: 'https://estudi-dental-carrera.vercel.app' },
+        { name: 'PalSec Agency', tag: 'Brand · Web', yr: '2025', url: 'https://www.palsec.agency' },
+        { name: 'Global Fisio', tag: 'Healthcare · Web', yr: '2024', url: 'https://global-fisio.vercel.app' },
+        { name: 'I-Pediatria', tag: 'Pediatrics · Web', yr: '2024', url: 'https://i-pediatria.vercel.app' },
       ],
     },
     quote: {

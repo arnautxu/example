@@ -100,13 +100,18 @@ body {
 .stage__overlay {
   position: absolute;
   inset: 0;
-  z-index: 2;
+  z-index: 5; /* above .scroll-proxy so links can be clicked */
   display: grid;
   grid-template-rows: 1fr auto;
   padding: clamp(16px, 3vw, 36px);
   padding-top: calc(clamp(16px, 3vw, 36px) + 56px);
   padding-bottom: max(clamp(16px, 3vw, 36px), env(safe-area-inset-bottom));
-  pointer-events: none;
+  pointer-events: none; /* let wheel pass through to .scroll-proxy below */
+}
+/* Re-enable interactivity only on actually-clickable elements */
+.stage__overlay .s-works__row,
+.stage__overlay .s-contact__col a {
+  pointer-events: auto;
 }
 
 /* Readability scrim — keeps text legible over the cinematic backdrop.
@@ -380,7 +385,7 @@ body {
 /* Scene 1 — title */
 .s-title {
   display: grid;
-  gap: clamp(20px, 3vw, 36px);
+  gap: clamp(14px, 2vh, 28px);
 }
 .s-title__eyebrow {
   font-family: var(--display);
@@ -401,12 +406,13 @@ body {
 .s-title__h {
   font-family: var(--display);
   font-weight: 400;
-  font-size: clamp(54px, 11vw, 168px);
-  line-height: 0.88;
-  letter-spacing: -0.04em;
+  font-size: clamp(40px, min(7.6vw, 11vh), 112px);
+  line-height: 0.92;
+  letter-spacing: -0.035em;
   color: var(--ink);
   margin: 0;
   font-feature-settings: 'ss01' 1, 'ss02' 1;
+  text-wrap: balance;
 }
 .s-title__h i {
   font-style: italic;
@@ -520,7 +526,21 @@ body {
   color: var(--ink);
   transition: color 0.4s ease;
 }
+.s-works__row {
+  text-decoration: none;
+  cursor: pointer;
+}
 .s-works__row:hover {
+  color: var(--accent);
+}
+.s-works__row .arrow {
+  display: inline-block;
+  margin-left: 2px;
+  transition: transform 0.3s ease;
+  color: var(--ink-faint);
+}
+.s-works__row:hover .arrow {
+  transform: translate(2px, -2px);
   color: var(--accent);
 }
 .s-works__row .num {
