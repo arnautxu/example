@@ -102,9 +102,9 @@ body {
   inset: 0;
   z-index: 2;
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: 1fr auto;
   padding: clamp(16px, 3vw, 36px);
-  padding-top: max(clamp(16px, 3vw, 36px), env(safe-area-inset-top));
+  padding-top: calc(clamp(16px, 3vw, 36px) + 56px);
   padding-bottom: max(clamp(16px, 3vw, 36px), env(safe-area-inset-bottom));
   pointer-events: none;
 }
@@ -186,18 +186,27 @@ body {
   pointer-events: auto;
 }
 
-/* Top bar */
+/* Top bar — its own fixed layer so the controls can actually be clicked
+   even though the scroll-proxy sits above the stage. */
 .topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 6;
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 24px;
+  padding: clamp(14px, 2vw, 22px) clamp(16px, 3vw, 36px);
+  padding-top: max(clamp(14px, 2vw, 22px), env(safe-area-inset-top));
   font-family: var(--display);
   font-weight: 500;
   font-size: 12px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--ink-mute);
+  pointer-events: auto;
 }
 
 .topbar__mark {

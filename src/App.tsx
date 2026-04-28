@@ -117,6 +117,51 @@ export default function App() {
         <div className="progress__bar" ref={progressBarRef} />
       </div>
 
+      {/* Top controls live in their own fixed layer above the scroll-proxy
+          so they can actually receive clicks. */}
+      <header className="topbar">
+        <div className="topbar__mark">
+          PalSec WebLab<span>.</span>
+        </div>
+
+        <div className="topbar__tag">{t.topbarTagline}</div>
+
+        <div className="topbar__controls">
+          <div className="seg" role="group" aria-label="Language">
+            <button
+              type="button"
+              className={`seg__btn ${lang === 'ca' ? 'is-on' : ''}`}
+              onClick={() => setLang('ca')}
+              aria-pressed={lang === 'ca'}
+            >
+              CA
+            </button>
+            <button
+              type="button"
+              className={`seg__btn ${lang === 'en' ? 'is-on' : ''}`}
+              onClick={() => setLang('en')}
+              aria-pressed={lang === 'en'}
+            >
+              EN
+            </button>
+          </div>
+          <button
+            type="button"
+            className="theme-btn"
+            onClick={toggleTheme}
+            aria-label={theme === 'night' ? t.toggles.theme.day : t.toggles.theme.night}
+            title={theme === 'night' ? t.toggles.theme.day : t.toggles.theme.night}
+          >
+            <span className="theme-btn__icon" aria-hidden>
+              {theme === 'night' ? '☀' : '☾'}
+            </span>
+            <span className="theme-btn__label">
+              {theme === 'night' ? t.toggles.theme.day : t.toggles.theme.night}
+            </span>
+          </button>
+        </div>
+      </header>
+
       <div className="stage">
         <div className="stage__canvas">
           <Scene3D ref={sceneRef} theme={theme} />
@@ -125,46 +170,6 @@ export default function App() {
         <div className="stage__scrim" aria-hidden />
 
         <div className="stage__overlay">
-          <header className="topbar">
-            <div className="topbar__mark">
-              PalSec WebLab<span>.</span>
-            </div>
-
-            <div className="topbar__tag">{t.topbarTagline}</div>
-
-            <div className="topbar__controls">
-              <div className="seg" role="group" aria-label="Language">
-                <button
-                  className={`seg__btn ${lang === 'ca' ? 'is-on' : ''}`}
-                  onClick={() => setLang('ca')}
-                  aria-pressed={lang === 'ca'}
-                >
-                  CA
-                </button>
-                <button
-                  className={`seg__btn ${lang === 'en' ? 'is-on' : ''}`}
-                  onClick={() => setLang('en')}
-                  aria-pressed={lang === 'en'}
-                >
-                  EN
-                </button>
-              </div>
-              <button
-                className="theme-btn"
-                onClick={toggleTheme}
-                aria-label={theme === 'night' ? t.toggles.theme.day : t.toggles.theme.night}
-                title={theme === 'night' ? t.toggles.theme.day : t.toggles.theme.night}
-              >
-                <span className="theme-btn__icon" aria-hidden>
-                  {theme === 'night' ? '☀' : '☾'}
-                </span>
-                <span className="theme-btn__label">
-                  {theme === 'night' ? t.toggles.theme.day : t.toggles.theme.night}
-                </span>
-              </button>
-            </div>
-          </header>
-
           <div className="scenes">
             <section className="scene" ref={sceneEls(0)}>
               <div className="scene__inner s-title">
