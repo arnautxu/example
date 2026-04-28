@@ -392,10 +392,9 @@ const Scene3D = forwardRef<Scene3DHandle, Scene3DProps>(({ theme }, ref) => {
 
       <Suspense fallback={null}>
         <Sculpture progressRef={progressRef} lite={lite} theme={theme} />
+        <Environment preset={theme === 'day' ? 'apartment' : (lite ? 'sunset' : 'warehouse')} />
       </Suspense>
       <Rig progressRef={progressRef} />
-
-      <Environment preset={theme === 'day' ? 'apartment' : (lite ? 'sunset' : 'warehouse')} />
     </Canvas>
   )
 })

@@ -20,7 +20,9 @@
   --rule: oklch(0.78 0.020 70);
   --accent: oklch(0.55 0.22 28);
   --accent-soft: oklch(0.55 0.22 28 / 0.16);
-  color-scheme: light;
+  /* Keep color-scheme: dark to avoid iOS Safari resetting momentum scroll
+     and scrollbar styling on theme change. The visual day palette comes
+     from the CSS custom properties above. */
 }
 
 :root {
@@ -72,6 +74,8 @@ body {
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   background: transparent;
+  touch-action: pan-y; /* iOS: keep momentum scroll across theme repaints */
+  overscroll-behavior: contain;
 }
 .scroll-proxy::-webkit-scrollbar {
   display: none;
