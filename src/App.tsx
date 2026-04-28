@@ -6,12 +6,12 @@ import Scene3D, { type Scene3DHandle } from './Scene3D'
 gsap.registerPlugin(ScrollTrigger)
 
 const SCENE_LABELS = [
-  'Index',
-  'Manifesto',
-  'Selected Works',
-  'Statement',
-  'Practice',
-  'Contact',
+  'Inici',
+  'Manifest',
+  'Projectes',
+  'Cita',
+  'Servei',
+  'Contacte',
 ]
 
 const TOTAL = SCENE_LABELS.length
@@ -103,7 +103,7 @@ export default function App() {
     <>
       <div className={`boot ${!booting ? 'hidden' : ''}`} aria-hidden={!booting}>
         <div className="boot__inner">
-          <div style={{ opacity: 0.6 }}>React Studio — Loading</div>
+          <div style={{ opacity: 0.6 }}>PalSec WebLab — Carregant</div>
           <div className="boot__count">{String(bootCount).padStart(3, '0')}</div>
         </div>
       </div>
@@ -122,33 +122,34 @@ export default function App() {
         <div className="stage__overlay">
           <header className="topbar">
             <div className="topbar__mark">
-              React<span>.</span>
+              PalSec WebLab<span>.</span>
             </div>
             <nav className="topbar__nav">
-              <span>Index</span>
-              <span>Works</span>
-              <span>Practice</span>
-              <span>Contact</span>
+              <span>Inici</span>
+              <span>Projectes</span>
+              <span>Servei</span>
+              <span>Contacte</span>
             </nav>
-            <div>2018 — 2026</div>
+            <div>Un departament de PalSec Agency</div>
           </header>
 
           <div className="scenes">
             <section className="scene" ref={sceneEls(0)}>
               <div className="scene__inner s-title">
-                <div className="s-title__eyebrow">A Studio for Moving Pictures</div>
+                <div className="s-title__eyebrow">Disseny i desenvolupament web · Des de Catalunya</div>
                 <h1 className="s-title__h">
-                  React<i>,</i> a design<br />
-                  studio for the<br />
-                  <i>screen</i> &amp; everything after.
+                  PalSec<i>,</i> dissenyem<br />
+                  webs que es <i>recorden</i><br />
+                  més enllà del scroll.
                 </h1>
                 <div className="s-title__sub">
                   <p>
-                    We craft brand systems, interactive sites, and three-dimensional
-                    storytelling for companies who want their first impression to
-                    last longer than a scroll.
+                    Som el WebLab de PalSec Agency: un equip dedicat exclusivament al
+                    disseny i desenvolupament de llocs web a mida — amb cura per la
+                    tipografia, el ritme i els detalls que fan que una web sembli un
+                    objecte i no una plantilla.
                   </p>
-                  <small>Lisbon · New York</small>
+                  <small>PalSec Agency · WebLab</small>
                 </div>
               </div>
             </section>
@@ -156,13 +157,13 @@ export default function App() {
             <section className="scene" ref={sceneEls(1)}>
               <div className="scene__inner s-manifesto">
                 <div className="s-manifesto__label">
-                  <span>Manifesto</span>
+                  <span>Manifest</span>
                   <b>§ 01 / 06</b>
                 </div>
                 <h2 className="s-manifesto__h">
-                  We don't make websites that <em>react</em> — we make websites that
-                  <em> respond</em>. With weight, with timing, with the kind of
-                  craft that suggests someone <em>cared</em>.
+                  No fem webs que <em>reaccionen</em> — fem webs que
+                  <em> responen</em>. Amb pes, amb temps, amb la mena de
+                  cura que fa pensar que algú s'hi ha <em>preocupat</em>.
                 </h2>
               </div>
             </section>
@@ -170,22 +171,22 @@ export default function App() {
             <section className="scene" ref={sceneEls(2)}>
               <div className="scene__inner s-works">
                 <div className="s-works__head">
-                  <h2>Selected Works</h2>
-                  <span>14 projects · 2022 — 2026</span>
+                  <h2>Projectes Seleccionats</h2>
+                  <span>Una mostra del nostre treball</span>
                 </div>
                 <div className="s-works__list">
                   {[
-                    ['Marble & Hand', 'Identity', '2026'],
+                    ['Marbre & Mà', 'Identitat', '2026'],
                     ['Folio Press', 'Editorial · Web', '2025'],
-                    ['Halcyon Audio', 'Brand · Product', '2025'],
-                    ['Northbound Co.', 'Site · 3D', '2024'],
-                    ['Type Atelier No. 7', 'Identity', '2024'],
-                    ['Cinder Studios', 'Motion · Brand', '2023'],
+                    ['Halcyon Àudio', 'Marca · Producte', '2025'],
+                    ['Nord Co.', 'Web · 3D', '2024'],
+                    ['Tipografia No. 7', 'Identitat', '2024'],
+                    ['Estudis Cendra', 'Motion · Marca', '2023'],
                   ].map(([name, tag, yr], i) => (
                     <div className="s-works__row" key={name}>
                       <span className="num">{String(i + 1).padStart(2, '0')}</span>
                       <span className="name">
-                        {name} <i>— a study</i>
+                        {name} <i>— un estudi</i>
                       </span>
                       <span className="tag">{tag}</span>
                       <span className="yr">{yr}</span>
@@ -198,35 +199,35 @@ export default function App() {
             <section className="scene" ref={sceneEls(3)}>
               <div className="scene__inner s-quote">
                 <blockquote>
-                  &ldquo;Great work doesn't ask for attention. <span>It earns it,
-                  slowly, by being worth looking at twice.&rdquo;</span>
+                  &laquo;Una bona web no demana atenció. <span>Se la guanya, a
+                  poc a poc, per ser digna d'una segona mirada.&raquo;</span>
                 </blockquote>
-                <cite>— Studio Note No. 14</cite>
+                <cite>— Apunt d'estudi Núm. 14</cite>
               </div>
             </section>
 
             <section className="scene" ref={sceneEls(4)}>
               <div className="scene__inner s-services">
                 <h2 className="s-services__h">
-                  Practice
-                  <em>What we do, in plain language</em>
+                  Servei
+                  <em>El que fem, en paraules clares</em>
                 </h2>
                 <div className="s-services__grid">
                   {[
                     {
                       n: '01',
-                      h: 'Brand systems built to last past the launch deck',
-                      list: ['Identity', 'Naming', 'Voice', 'Guidelines'],
+                      h: 'Webs corporatives fetes per durar més enllà del llançament',
+                      list: ['Estratègia', 'Disseny UX/UI', 'Art direction', 'Copy'],
                     },
                     {
                       n: '02',
-                      h: 'Websites that feel like objects, not templates',
-                      list: ['Art Direction', 'Frontend', 'Three.js', 'CMS'],
+                      h: 'Desenvolupament a mida amb codi propi i net',
+                      list: ['Frontend', 'CMS', 'Headless', 'Integracions'],
                     },
                     {
                       n: '03',
-                      h: 'Three-dimensional craft for stories told on flat screens',
-                      list: ['Modelling', 'Shading', 'Motion', 'Real-time'],
+                      h: 'Detall en moviment: animació, 3D i interacció',
+                      list: ['Three.js', 'Motion', 'Micro-interaccions', 'Performance'],
                     },
                   ].map((s) => (
                     <div className="s-services__cell" key={s.n}>
@@ -246,25 +247,25 @@ export default function App() {
             <section className="scene" ref={sceneEls(5)}>
               <div className="scene__inner s-contact">
                 <h2 className="s-contact__h">
-                  Have a project?<br />
-                  Let's <u>begin</u> a conversation.
+                  Tens un projecte?<br />
+                  <u>Comencem</u> a parlar-ne.
                 </h2>
                 <div className="s-contact__grid">
                   <div className="s-contact__col">
-                    <span>Email</span>
-                    <a href="mailto:hello@react.studio">hello@react.studio</a>
+                    <span>Correu</span>
+                    <a href="mailto:weblab@palsec.agency">weblab@palsec.agency</a>
                   </div>
                   <div className="s-contact__col">
-                    <span>Press</span>
-                    <a href="mailto:press@react.studio">press@react.studio</a>
+                    <span>Agència</span>
+                    <a href="mailto:hola@palsec.agency">hola@palsec.agency</a>
                   </div>
                   <div className="s-contact__col">
-                    <span>Lisbon</span>
-                    <p>R. Garrett 22, 2º</p>
+                    <span>Departament</span>
+                    <p>WebLab — PalSec Agency</p>
                   </div>
                   <div className="s-contact__col">
-                    <span>New York</span>
-                    <p>110 Greene St, 4F</p>
+                    <span>Seu</span>
+                    <p>Catalunya</p>
                   </div>
                 </div>
               </div>
@@ -275,11 +276,11 @@ export default function App() {
             <div className="botbar__counter">
               <b ref={counterNumRef}>01</b>
               <em>/ 06 —</em>
-              <em ref={sceneLabelRef}>Index</em>
+              <em ref={sceneLabelRef}>Inici</em>
             </div>
             <div className="botbar__hint">
               <span className="dot" />
-              Scroll to advance
+              Desplaça per avançar
             </div>
           </footer>
         </div>
