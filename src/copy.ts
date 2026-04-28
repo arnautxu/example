@@ -33,23 +33,27 @@ export const COPY: Record<Lang, Copy> = {
     bootLabel: 'PalSec WebLab · Carregant',
     topbarTagline: 'Un departament de PalSec Agency',
     toggles: { lang: { ca: 'CA', en: 'EN' }, theme: { day: 'Dia', night: 'Nit' } },
-    sceneLabels: ['Inici', 'Manifest', 'Projectes', 'Cita', 'Servei', 'Contacte'],
+    sceneLabels: ['Inici', 'Manifest', 'Projectes', 'Mètode', 'Servei', 'Contacte'],
     scrollHint: 'Desplaça per avançar',
 
     title: {
       eyebrow: 'Un projecte de PalSec Agcy.',
-      h: { l1: 'PalSec, dissenyem', l2: 'webs que es recorden', l3: 'més enllà del scroll.' },
-      sub: 'Som el WebLab de PalSec Agency: un equip dedicat exclusivament al disseny i desenvolupament de llocs web a mida, amb cura per la tipografia, el ritme i els detalls que fan que una web sembli un objecte i no una plantilla.',
+      h: {
+        l1: 'Webs a mida',
+        l2: 'per a clíniques, despatxos',
+        l3: 'i marques que es preocupen pel detall.',
+      },
+      sub: 'Som el WebLab de PalSec Agency. Dissenyem i programem webs des de zero per a professionals i empreses que volen ser percebuts amb la mateixa cura amb què treballen. Cap plantilla. Cap WordPress. Cap producte enllaunat. Cada projecte: codi propi, disseny únic, llançament en 6 a 8 setmanes.',
       smallTag: 'PalSec Agency · WebLab',
     },
     manifesto: {
       label: 'Manifest',
       section: '§ 01 / 06',
-      h: "No fem webs que reaccionen. Fem webs que responen. Amb pes, amb temps, amb la mena de cura que fa pensar que algú s'hi ha preocupat.",
+      h: "La majoria d'agències et venen una plantilla amb el teu logo a sobre. Nosaltres no. Cada web que llancem es dissenya des de zero, es programa des de zero, i no s'assembla a cap altra. És més lent. És més car. Val la pena.",
     },
     works: {
-      head: 'Projectes Seleccionats',
-      sub: 'Una mostra del nostre treball',
+      head: 'Projectes Recents',
+      sub: '4 webs en producció · 2024–2025',
       rowSuffix: 'visita la web',
       items: [
         { name: 'Estudi Dental Carrera', tag: 'Salut · Web', yr: '2025', url: 'https://estudi-dental-carrera.vercel.app' },
@@ -59,21 +63,38 @@ export const COPY: Record<Lang, Copy> = {
       ],
     },
     quote: {
-      open: 'Una bona web no demana atenció.',
-      close: "Se la guanya, a poc a poc, per ser digna d'una segona mirada.",
-      cite: "Apunt d'estudi Núm. 14",
+      open: 'Quan publiquem una web, hi has de reconèixer la teva veu, no la nostra.',
+      close: "És l'única regla que no negociem.",
+      cite: 'Mètode PalSec WebLab',
     },
     services: {
       h: 'Servei',
-      sub: 'El que fem, en paraules clares',
+      sub: 'Tres coses, ben fetes',
       cells: [
-        { n: '01', h: 'Webs corporatives fetes per durar més enllà del llançament', list: ['Estratègia', 'Disseny UX/UI', 'Art direction', 'Copy'] },
-        { n: '02', h: 'Desenvolupament a mida amb codi propi i net', list: ['Frontend', 'CMS', 'Headless', 'Integracions'] },
-        { n: '03', h: 'Detall en moviment: animació, 3D i interacció', list: ['Three.js', 'Motion', 'Micro-interaccions', 'Performance'] },
+        {
+          n: '01',
+          h: 'Webs corporatives. Disseny i copy fets a mida des de la primera línia.',
+          list: ['Estratègia', 'Disseny UX/UI', 'Art direction', 'Copy'],
+        },
+        {
+          n: '02',
+          h: 'Codi propi. Sense WordPress, sense temes comprats. La web és teva, no llogada.',
+          list: ['Frontend', 'CMS headless', 'Hosting', 'Manteniment'],
+        },
+        {
+          n: '03',
+          h: 'Detalls que es noten. Animació, 3D i micro-interaccions on aporten alguna cosa real.',
+          list: ['Three.js', 'Motion', 'Micro-interaccions', 'Performance'],
+        },
       ],
     },
     contact: {
-      h: { l1: 'Tens un projecte?', l2pre: '', l2under: 'Comencem', l2post: ' a parlar-ne.' },
+      h: {
+        l1: 'Tens un projecte?',
+        l2pre: '',
+        l2under: 'Parlem.',
+        l2post: ' 30 minuts. Sense compromís.',
+      },
       cols: { email: 'Correu', agency: 'Agència', dept: 'Departament', hq: 'Seu' },
       deptValue: 'WebLab · PalSec Agency',
       hqValue: 'Catalunya',
@@ -84,24 +105,28 @@ export const COPY: Record<Lang, Copy> = {
     bootLabel: 'PalSec WebLab · Loading',
     topbarTagline: 'A PalSec Agency department',
     toggles: { lang: { ca: 'CA', en: 'EN' }, theme: { day: 'Day', night: 'Night' } },
-    sceneLabels: ['Index', 'Manifesto', 'Works', 'Statement', 'Practice', 'Contact'],
+    sceneLabels: ['Index', 'Manifesto', 'Work', 'Method', 'Practice', 'Contact'],
     scrollHint: 'Scroll to advance',
 
     title: {
       eyebrow: 'A PalSec Agcy. project',
-      h: { l1: 'PalSec, websites', l2: 'that stay with you', l3: 'beyond the scroll.' },
-      sub: "We are PalSec Agency's WebLab — a team dedicated exclusively to bespoke web design and development, with care for typography, rhythm, and the details that make a website feel like an object, not a template.",
+      h: {
+        l1: 'Bespoke websites',
+        l2: 'for clinics, practices',
+        l3: 'and brands that care about detail.',
+      },
+      sub: "We're the WebLab of PalSec Agency. We design and code websites from scratch for professionals and companies who want to be seen with the same care they put into their work. No templates. No WordPress. No off-the-shelf products. Every project: our own code, unique design, shipped in 6 to 8 weeks.",
       smallTag: 'PalSec Agency · WebLab',
     },
     manifesto: {
       label: 'Manifesto',
       section: '§ 01 / 06',
-      h: "We don't build websites that react — we build websites that respond. With weight, with timing, with the kind of craft that suggests someone cared.",
+      h: "Most agencies sell you a template with your logo dropped on top. We don't. Every site we ship is designed from scratch, built from scratch, and looks like nothing else. It's slower. It's more expensive. It's worth it.",
     },
     works: {
-      head: 'Selected Works',
-      sub: 'A selection of our work',
-      rowSuffix: '— visit site',
+      head: 'Recent Work',
+      sub: '4 sites in production · 2024–2025',
+      rowSuffix: 'visit site',
       items: [
         { name: 'Estudi Dental Carrera', tag: 'Healthcare · Web', yr: '2025', url: 'https://estudi-dental-carrera.vercel.app' },
         { name: 'PalSec Agency', tag: 'Brand · Web', yr: '2025', url: 'https://www.palsec.agency' },
@@ -110,21 +135,38 @@ export const COPY: Record<Lang, Copy> = {
       ],
     },
     quote: {
-      open: "A good website doesn't ask for attention.",
-      close: 'It earns it, slowly, by being worth a second look.',
-      cite: '— Studio Note No. 14',
+      open: 'When we ship a website, you should hear your voice in it, not ours.',
+      close: "That's the one rule we don't negotiate.",
+      cite: 'PalSec WebLab Method',
     },
     services: {
       h: 'Practice',
-      sub: 'What we do, in plain language',
+      sub: 'Three things, well made',
       cells: [
-        { n: '01', h: 'Brand websites built to last past the launch', list: ['Strategy', 'UX/UI Design', 'Art Direction', 'Copy'] },
-        { n: '02', h: 'Bespoke development with clean, owned code', list: ['Frontend', 'CMS', 'Headless', 'Integrations'] },
-        { n: '03', h: 'Detail in motion: animation, 3D, and interaction', list: ['Three.js', 'Motion', 'Micro-interactions', 'Performance'] },
+        {
+          n: '01',
+          h: 'Brand websites. Design and copy made from the first line.',
+          list: ['Strategy', 'UX/UI Design', 'Art Direction', 'Copy'],
+        },
+        {
+          n: '02',
+          h: "Our own code. No WordPress, no purchased themes. The site is yours, not rented.",
+          list: ['Frontend', 'Headless CMS', 'Hosting', 'Maintenance'],
+        },
+        {
+          n: '03',
+          h: 'Details that show. Animation, 3D, and micro-interactions where they actually help.',
+          list: ['Three.js', 'Motion', 'Micro-interactions', 'Performance'],
+        },
       ],
     },
     contact: {
-      h: { l1: 'Have a project?', l2pre: "Let's ", l2under: 'begin', l2post: ' a conversation.' },
+      h: {
+        l1: 'Got a project?',
+        l2pre: '',
+        l2under: "Let's talk.",
+        l2post: ' 30 minutes. No obligation.',
+      },
       cols: { email: 'Email', agency: 'Agency', dept: 'Department', hq: 'HQ' },
       deptValue: 'WebLab · PalSec Agency',
       hqValue: 'Catalonia',
