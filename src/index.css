@@ -51,49 +51,39 @@ body,
   margin: 0;
   padding: 0;
   width: 100%;
-  height: 100%;
-  overflow: hidden;
+}
+
+html, body {
+  /* Body scrolls naturally; the cinematic stage is position:fixed on top.
+     This lets mobile use native momentum scrolling and propagates pan
+     events through clickable links without custom forwarding. */
+  overflow-x: hidden;
 }
 
 body {
   background: var(--bg);
-  overscroll-behavior: none;
+  overscroll-behavior-y: none;
 }
 
-/* The scroll proxy: a tall, invisible track that drives ScrollTrigger.
-   The viewport itself stays locked — user never sees the page move.
-   Sits on top of the stage so it receives wheel/touch events. */
-.scroll-proxy {
-  position: fixed;
-  inset: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  width: 100%;
-  height: 100%;
-  z-index: 4;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  background: transparent;
-  touch-action: pan-y; /* iOS: keep momentum scroll across theme repaints */
-  overscroll-behavior: contain;
-}
-.scroll-proxy::-webkit-scrollbar {
-  display: none;
-}
+/* The scroll track: a tall, invisible block in the body so the browser
+   has something to scroll. ScrollTrigger reads window scroll naturally. */
 .scroll-proxy__track {
   width: 100%;
-  /* 6 scenes × 100vh of scroll → drives the timeline */
-  height: 600vh;
+  height: 600vh; /* 6 scenes × 100vh */
   pointer-events: none;
 }
+/* Hide the body scrollbar for a clean cinematic feel */
+html { scrollbar-width: none; }
+html::-webkit-scrollbar { display: none; }
 
-/* Stage — fixed cinematic frame the user actually sees */
+/* Stage — fixed cinematic frame the user actually sees while the body scrolls */
 .stage {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 2;
 }
+.stage__canvas { pointer-events: none; }
 
 .stage__canvas {
   position: absolute;
@@ -304,8 +294,10 @@ body {
   border-radius: 50%;
   background: var(--accent);
   color: var(--bg);
-  font-size: 11px;
-  line-height: 1;
+  flex-shrink: 0;
+}
+.theme-btn__icon svg {
+  display: block;
 }
 
 /* Bottom bar — scene counter + hint */
@@ -796,7 +788,7 @@ body {
   .theme-btn { padding: 5px 10px 5px 8px; font-size: 10px; }
   .theme-btn__label { display: none; }
   .theme-btn { padding: 5px; }
-  .theme-btn__icon { width: 22px; height: 22px; font-size: 12px; }
+  .theme-btn__icon { width: 22px; height: 22px; }
 
   .scene__inner { padding: 0 18px; }
 

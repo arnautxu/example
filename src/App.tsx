@@ -11,7 +11,6 @@ type Theme = 'night' | 'day'
 const TOTAL = 6
 
 export default function App() {
-  const proxyRef = useRef<HTMLDivElement>(null)
   const sceneRefs = useRef<(HTMLDivElement | null)[]>([])
   const sceneEls = (i: number) => (el: HTMLDivElement | null) => {
     sceneRefs.current[i] = el
@@ -53,15 +52,13 @@ export default function App() {
 
   useEffect(() => {
     if (booting) return
-    const proxy = proxyRef.current!
     const ctx = gsap.context(() => {
       gsap.set(sceneRefs.current, { opacity: 0, y: 24 })
       gsap.set(sceneRefs.current[0], { opacity: 1, y: 0 })
 
       const tl = gsap.timeline({
         scrollTrigger: {
-          scroller: proxy,
-          trigger: proxy.querySelector('.scroll-proxy__track'),
+          trigger: '.scroll-proxy__track',
           start: 'top top',
           end: 'bottom bottom',
           scrub: 1.2,
@@ -96,22 +93,13 @@ export default function App() {
           i + 0.55,
         )
       }
-    }, proxy)
+    })
 
     ScrollTrigger.refresh()
     return () => ctx.revert()
   }, [booting])
 
   const toggleTheme = () => setTheme((th) => (th === 'night' ? 'day' : 'night'))
-
-  // Wheel events on clickable elements (works rows, contact links) don't
-  // bubble to the .scroll-proxy because those elements live above it. Forward
-  // them manually so the page keeps advancing while the cursor is over a link.
-  const forwardWheel = (e: React.WheelEvent<HTMLElement>) => {
-    if (proxyRef.current) {
-      proxyRef.current.scrollTop += e.deltaY
-    }
-  }
 
   return (
     <>
@@ -162,7 +150,16 @@ export default function App() {
             title={theme === 'night' ? t.toggles.theme.day : t.toggles.theme.night}
           >
             <span className="theme-btn__icon" aria-hidden>
-              {theme === 'night' ? '☀' : '☾'}
+              {theme === 'night' ? (
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                  <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                </svg>
+              )}
             </span>
             <span className="theme-btn__label">
               {theme === 'night' ? t.toggles.theme.day : t.toggles.theme.night}
@@ -220,7 +217,6 @@ export default function App() {
                       href={p.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      onWheel={forwardWheel}
                     >
                       <span className="num">{String(i + 1).padStart(2, '0')}</span>
                       <span className="name">
@@ -276,7 +272,7 @@ export default function App() {
                 <div className="s-contact__grid">
                   <div className="s-contact__col">
                     <span>{t.contact.cols.email}</span>
-                    <a href="mailto:info@palsec.agency" onWheel={forwardWheel}>info@palsec.agency</a>
+                    <a href="mailto:info@palsec.agency">info@palsec.agency</a>
                   </div>
                   <div className="s-contact__col">
                     <span>{t.contact.cols.agency}</span>
@@ -284,7 +280,6 @@ export default function App() {
                       href="https://www.palsec.agency"
                       target="_blank"
                       rel="noopener noreferrer"
-                      onWheel={forwardWheel}
                     >
                       www.palsec.agency
                     </a>
@@ -295,7 +290,6 @@ export default function App() {
                       href="https://www.palsec.agency"
                       target="_blank"
                       rel="noopener noreferrer"
-                      onWheel={forwardWheel}
                     >
                       {t.contact.deptValue}
                     </a>
@@ -306,7 +300,6 @@ export default function App() {
                       href="https://www.google.com/maps/place/Catalonia"
                       target="_blank"
                       rel="noopener noreferrer"
-                      onWheel={forwardWheel}
                     >
                       {t.contact.hqValue}
                     </a>
@@ -329,9 +322,8 @@ export default function App() {
           </footer>
         </div>
 
-      <div className="scroll-proxy" ref={proxyRef}>
-        <div className="scroll-proxy__track" />
-      </div>
+      {/* Tall invisible track gives the body something to scroll. */}
+      <div className="scroll-proxy__track" aria-hidden />
     </>
   )
 }
