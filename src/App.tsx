@@ -53,28 +53,15 @@ export default function App() {
   useEffect(() => {
     if (booting) return
     const ctx = gsap.context(() => {
-      // All scenes are at full opacity. The transition is a vertical wipe
-      // implemented with clip-path: at any given moment, A occupies the
-      // top portion of the viewport and B occupies the bottom — they
-      // share a moving horizontal split line, never the same pixel.
-      gsap.set(sceneRefs.current, { opacity: 1, clipPath: 'inset(100% 0% 0% 0%)' })
-      gsap.set(sceneRefs.current[0], { clipPath: 'inset(0% 0% 0% 0%)' })
+      gsap.set(sceneRefs.current, { opacity: 0, y: 24, clipPath: 'none' })
+      gsap.set(sceneRefs.current[0], { opacity: 1, y: 0 })
 
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: '.scroll-proxy__track',
           start: 'top top',
           end: 'bottom bottom',
-          // Smooth scrub: more lag = softer, less twitchy
-          scrub: 2.2,
-          // Snap to scene boundaries when user stops scrolling so transitions
-          // always finish cleanly, with their own momentum.
-          snap: {
-            snapTo: 1 / (TOTAL - 1),
-            duration: { min: 0.4, max: 0.9 },
-            ease: 'power2.inOut',
-            delay: 0.08,
-          },
+          scrub: 1.2,
           onUpdate: (self) => {
             const p = self.progress
             sceneRef.current?.setProgress(p)
@@ -92,20 +79,18 @@ export default function App() {
         },
       })
 
-      // Vertical wipe driven by a single eased curve. A and B share a
-      // moving boundary line, so no pixel ever holds both scenes at once.
-      // The wipe spans most of the segment for a slow, cinematic feel.
       for (let i = 0; i < TOTAL - 1; i++) {
         const a = sceneRefs.current[i]
         const b = sceneRefs.current[i + 1]
         tl.to(
           a,
-          { clipPath: 'inset(0% 0% 100% 0%)', duration: 0.85, ease: 'power3.inOut' },
-          i + 0.10,
-        ).to(
+          { opacity: 0, y: -32, duration: 0.5, ease: 'power2.in' },
+          i + 0.45,
+        ).fromTo(
           b,
-          { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.85, ease: 'power3.inOut' },
-          i + 0.10,
+          { opacity: 0, y: 32 },
+          { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' },
+          i + 0.55,
         )
       }
     })
