@@ -1,6 +1,6 @@
 import { useRef, useMemo, forwardRef, useImperativeHandle, useEffect, useState, Suspense } from 'react'
 import { Canvas, useFrame, useLoader } from '@react-three/fiber'
-import { Environment, Float } from '@react-three/drei'
+import { Environment, MeshTransmissionMaterial, Float } from '@react-three/drei'
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
 import * as THREE from 'three'
 
@@ -58,7 +58,6 @@ function Rig({ progressRef }: RigProps) {
   return null
 }
 
-// Build a single, centered, normalized BufferGeometry from the PalSec logo SVG.
 function useLogoGeometry(lite: boolean): THREE.BufferGeometry {
   const data = useLoader(SVGLoader, '/palsec-logo.svg')
 
@@ -79,9 +78,6 @@ function useLogoGeometry(lite: boolean): THREE.BufferGeometry {
       curveSegments: lite ? 8 : 14,
     })
 
-    // SVG Y points down, three.js Y points up. Use a rigid rotation rather
-    // than a negative scale so winding is preserved and holes (inner letter
-    // counters) are detected correctly by ExtrudeGeometry.
     geom.rotateX(Math.PI)
     geom.computeBoundingBox()
     const bb = geom.boundingBox!
@@ -90,7 +86,6 @@ function useLogoGeometry(lite: boolean): THREE.BufferGeometry {
     const cz = (bb.min.z + bb.max.z) / 2
     geom.translate(-cx, -cy, -cz)
 
-    // Normalize size so the logo's longest side fits ~3 units
     const sizeX = bb.max.x - bb.min.x
     const target = 3.4
     const k = target / sizeX
@@ -101,17 +96,18 @@ function useLogoGeometry(lite: boolean): THREE.BufferGeometry {
   }, [data, lite])
 }
 
-// Soft, low-contrast dust speck — fades to nothing at the edges. No bright
-// core (that's what makes particles read as stars rather than dust).
-function makeDustTexture() {
-  const size = 64
+// Soft bokeh sprite — very soft falloff, no hot core. Used for the
+// premium, defocused-light-spot look.
+function makeBokehTexture() {
+  const size = 128
   const c = document.createElement('canvas')
   c.width = c.height = size
   const ctx = c.getContext('2d')!
   const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2)
-  g.addColorStop(0, 'rgba(220, 180, 110, 0.55)')
-  g.addColorStop(0.45, 'rgba(200, 160, 90, 0.18)')
-  g.addColorStop(1, 'rgba(180, 140, 70, 0)')
+  g.addColorStop(0, 'rgba(255, 220, 200, 0.9)')
+  g.addColorStop(0.25, 'rgba(255, 180, 150, 0.45)')
+  g.addColorStop(0.55, 'rgba(220, 90, 70, 0.18)')
+  g.addColorStop(1, 'rgba(180, 50, 40, 0)')
   ctx.fillStyle = g
   ctx.fillRect(0, 0, size, size)
   const tex = new THREE.CanvasTexture(c)
@@ -119,86 +115,138 @@ function makeDustTexture() {
   return tex
 }
 
-function GoldenDust({ progressRef, lite }: SculptProps) {
-  const ref = useRef<THREE.Points>(null!)
-  const count = lite ? 260 : 900
-  const tex = useMemo(makeDustTexture, [])
+// Floating bokeh orbs — cinematic out-of-focus light specks. Some big and
+// blurry, some small and sharp. Reads as premium, not as a particle effect.
+function BokehField({ progressRef, lite }: SculptProps) {
+  const groupRef = useRef<THREE.Group>(null!)
+  const tex = useMemo(makeBokehTexture, [])
 
-  // positions, base positions, per-mote phase, per-mote size, per-mote tint
-  const { positions, basePositions, speeds, sizes, colors } = useMemo(() => {
-    const positions = new Float32Array(count * 3)
-    const basePositions = new Float32Array(count * 3)
-    const speeds = new Float32Array(count)
-    const sizes = new Float32Array(count)
-    const colors = new Float32Array(count * 3)
-
-    for (let i = 0; i < count; i++) {
-      // Volumetric cloud — fills space around the logo with depth
+  const orbs = useMemo(() => {
+    const count = lite ? 26 : 48
+    return Array.from({ length: count }, (_, i) => {
       const angle = Math.random() * Math.PI * 2
-      const r = 1.4 + Math.pow(Math.random(), 0.7) * 3.2
-      const y = (Math.random() - 0.5) * 3.6
-      const z = Math.sin(angle) * r + (Math.random() - 0.5) * 1.2
-      const x = Math.cos(angle) * r + (Math.random() - 0.5) * 1.2
-      positions[i * 3 + 0] = x
-      positions[i * 3 + 1] = y
-      positions[i * 3 + 2] = z
-      basePositions[i * 3 + 0] = x
-      basePositions[i * 3 + 1] = y
-      basePositions[i * 3 + 2] = z
-
-      speeds[i] = 0.15 + Math.random() * 0.35
-
-      // Wide variation in size — real dust isn't uniform
-      sizes[i] = 0.4 + Math.pow(Math.random(), 2) * 1.6
-
-      // Tint range: warm gold → pale champagne → slightly desaturated
-      const warmth = 0.7 + Math.random() * 0.3
-      colors[i * 3 + 0] = 0.85 * warmth
-      colors[i * 3 + 1] = 0.7 * warmth
-      colors[i * 3 + 2] = 0.45 * warmth * (0.8 + Math.random() * 0.4)
-    }
-    return { positions, basePositions, speeds, sizes, colors }
-  }, [count])
+      const r = 1.8 + Math.random() * 3.4
+      const depth = (Math.random() - 0.5) * 4
+      // Bias toward larger, blurrier orbs in front; smaller ones in back
+      const isFar = Math.random() < 0.55
+      const scale = isFar ? 0.22 + Math.random() * 0.35 : 0.5 + Math.random() * 1.1
+      // Warm tonal range — biased red, with a few champagne highlights
+      const warm = Math.random()
+      const color = warm < 0.7
+        ? new THREE.Color('#ea4a3a').lerp(new THREE.Color('#ff7a55'), Math.random())
+        : new THREE.Color('#ffd9b8').lerp(new THREE.Color('#ffc290'), Math.random())
+      return {
+        x: Math.cos(angle) * r,
+        y: (Math.random() - 0.5) * 3.2,
+        z: Math.sin(angle) * r + depth,
+        scale,
+        color,
+        opacity: isFar ? 0.18 + Math.random() * 0.18 : 0.35 + Math.random() * 0.28,
+        speed: 0.05 + Math.random() * 0.18,
+        phase: i * 0.7,
+      }
+    })
+  }, [lite])
 
   useFrame((state) => {
-    if (!ref.current) return
-    const p = progressRef.current
     const t = state.clock.elapsedTime
-    const arr = ref.current.geometry.attributes.position.array as Float32Array
-
-    // Slow, near-gravityless drift — like dust suspended in still air
-    for (let i = 0; i < count; i++) {
-      const i3 = i * 3
-      const sp = speeds[i]
-      arr[i3 + 0] = basePositions[i3 + 0] + Math.sin(t * sp * 0.4 + i * 1.7) * 0.08
-      arr[i3 + 1] = basePositions[i3 + 1] + Math.sin(t * sp * 0.5 + i) * 0.12
-      arr[i3 + 2] = basePositions[i3 + 2] + Math.cos(t * sp * 0.45 + i * 0.7) * 0.08
+    const p = progressRef.current
+    if (groupRef.current) {
+      groupRef.current.rotation.y = -t * 0.018 + p * Math.PI * 0.3
+      groupRef.current.rotation.x = Math.sin(t * 0.04) * 0.06 - p * 0.1
+      groupRef.current.children.forEach((mesh, i) => {
+        const o = orbs[i]
+        if (!o) return
+        mesh.position.x = o.x + Math.sin(t * o.speed + o.phase) * 0.16
+        mesh.position.y = o.y + Math.sin(t * o.speed * 0.8 + o.phase * 1.3) * 0.22
+        mesh.position.z = o.z + Math.cos(t * o.speed * 0.7 + o.phase) * 0.16
+      })
     }
-    ref.current.geometry.attributes.position.needsUpdate = true
-
-    // Very slow rotation so motion doesn't feel mechanical
-    ref.current.rotation.y = -t * 0.012 + p * Math.PI * 0.25
-    ref.current.rotation.x = Math.sin(t * 0.03) * 0.05 - p * 0.08
   })
 
   return (
-    <points ref={ref}>
-      <bufferGeometry>
-        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
-        <bufferAttribute attach="attributes-color" args={[colors, 3]} />
-        <bufferAttribute attach="attributes-size" args={[sizes, 1]} />
-      </bufferGeometry>
-      <pointsMaterial
-        size={lite ? 0.045 : 0.055}
-        map={tex}
-        alphaMap={tex}
-        vertexColors
-        transparent
-        opacity={0.65}
+    <group ref={groupRef}>
+      {orbs.map((o, i) => (
+        <sprite key={i} position={[o.x, o.y, o.z]} scale={[o.scale, o.scale, o.scale]}>
+          <spriteMaterial
+            map={tex}
+            color={o.color}
+            transparent
+            opacity={o.opacity}
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+          />
+        </sprite>
+      ))}
+    </group>
+  )
+}
+
+// Gradient backdrop shader — replaces the flat black background with a
+// warm, cinematic radial gradient + subtle red glow + film grain.
+function Backdrop() {
+  const matRef = useRef<THREE.ShaderMaterial>(null!)
+  useFrame((state) => {
+    if (matRef.current) {
+      matRef.current.uniforms.uTime.value = state.clock.elapsedTime
+    }
+  })
+  return (
+    <mesh position={[0, 0, -8]} scale={[40, 22, 1]} renderOrder={-1}>
+      <planeGeometry args={[1, 1]} />
+      <shaderMaterial
+        ref={matRef}
         depthWrite={false}
-        sizeAttenuation
+        depthTest={false}
+        uniforms={{ uTime: { value: 0 } }}
+        vertexShader={`
+          varying vec2 vUv;
+          void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `}
+        fragmentShader={`
+          varying vec2 vUv;
+          uniform float uTime;
+
+          float hash(vec2 p) {
+            return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
+          }
+
+          void main() {
+            vec2 uv = vUv - 0.5;
+            uv.x *= 1.6;
+            float r = length(uv);
+
+            // Base gradient: warm dark center → deeper espresso edges
+            vec3 inner = vec3(0.135, 0.095, 0.085);
+            vec3 outer = vec3(0.045, 0.030, 0.025);
+            vec3 col = mix(inner, outer, smoothstep(0.0, 0.85, r));
+
+            // Soft red glow behind the logo
+            float glow = exp(-r * 3.2) * 0.55;
+            col += vec3(0.92, 0.18, 0.14) * glow;
+
+            // Off-axis amber rim highlight, very subtle
+            vec2 rimUv = vUv - vec2(0.78, 0.32);
+            rimUv.x *= 1.4;
+            float rim = exp(-length(rimUv) * 4.5) * 0.22;
+            col += vec3(0.95, 0.55, 0.30) * rim;
+
+            // Film grain
+            float n = hash(vUv * 1024.0 + floor(uTime * 8.0));
+            col += (n - 0.5) * 0.022;
+
+            // Edge vignette
+            float v = smoothstep(0.55, 1.05, r);
+            col *= 1.0 - v * 0.55;
+
+            gl_FragColor = vec4(col, 1.0);
+          }
+        `}
       />
-    </points>
+    </mesh>
   )
 }
 
@@ -227,38 +275,58 @@ function Sculpture({ progressRef, lite }: SculptProps) {
 
   return (
     <group>
-      {/* PalSec logo, extruded — gold material */}
+      <Backdrop />
+
+      {/* PalSec logo — red glass */}
       <Float speed={1.2} rotationIntensity={0.3} floatIntensity={0.5}>
         <group ref={logoGroup}>
           <mesh geometry={logoGeom} castShadow>
-            <meshPhysicalMaterial
-              color="#d4a23a"
-              metalness={1}
-              roughness={lite ? 0.32 : 0.22}
-              clearcoat={0.6}
-              clearcoatRoughness={0.25}
-              emissive="#3a2200"
-              emissiveIntensity={0.25}
-              envMapIntensity={1.4}
-            />
+            {lite ? (
+              <meshPhysicalMaterial
+                color="#ea0029"
+                metalness={0}
+                roughness={0.18}
+                clearcoat={1}
+                clearcoatRoughness={0.12}
+                transmission={0.6}
+                thickness={0.6}
+                ior={1.45}
+                attenuationColor="#ea0029"
+                attenuationDistance={0.8}
+                emissive="#3a0006"
+                emissiveIntensity={0.4}
+              />
+            ) : (
+              <MeshTransmissionMaterial
+                backside
+                samples={6}
+                resolution={512}
+                transmission={1}
+                roughness={0.06}
+                thickness={1.2}
+                ior={1.45}
+                chromaticAberration={0.18}
+                anisotropy={0.4}
+                distortion={0.2}
+                distortionScale={0.4}
+                temporalDistortion={0.1}
+                color="#fff5ec"
+                attenuationColor="#ea0029"
+                attenuationDistance={1.0}
+              />
+            )}
           </mesh>
         </group>
       </Float>
 
-      {/* Outer thin ring — gold accent */}
+      {/* Outer thin ring — red accent */}
       <mesh ref={ring} rotation={[Math.PI / 2.4, 0, 0]}>
         <torusGeometry args={[2.6, 0.008, 16, lite ? 120 : 240]} />
-        <meshBasicMaterial color="#ffd271" />
+        <meshBasicMaterial color="#ea0029" />
       </mesh>
 
-      {/* Golden dust cloud — replaces the orbiting shards */}
-      <GoldenDust progressRef={progressRef} lite={lite} />
-
-      {/* Backdrop disc */}
-      <mesh position={[0, 0, -3.5]} scale={[14, 14, 1]}>
-        <circleGeometry args={[1, 64]} />
-        <meshStandardMaterial color="#15110c" roughness={1} metalness={0} />
-      </mesh>
+      {/* Cinematic bokeh orbs */}
+      <BokehField progressRef={progressRef} lite={lite} />
     </group>
   )
 }
@@ -298,20 +366,18 @@ const Scene3D = forwardRef<Scene3DHandle>((_, ref) => {
       frameloop="always"
       style={{ background: 'transparent' }}
     >
-      <color attach="background" args={['#100e0c']} />
-      {!lite && <fog attach="fog" args={['#100e0c', 8, 22]} />}
-
-      <ambientLight intensity={lite ? 0.4 : 0.25} color="#fff1d6" />
-      <directionalLight position={[4, 5, 3]} intensity={1.6} color="#fff2cf" />
-      <directionalLight position={[-3, -2, -2]} intensity={0.5} color="#a86a1a" />
+      <color attach="background" args={['#100806']} />
+      <ambientLight intensity={lite ? 0.45 : 0.3} color="#fff1d6" />
+      <directionalLight position={[4, 5, 3]} intensity={1.5} color="#fff2cf" />
+      <directionalLight position={[-3, -2, -2]} intensity={0.8} color="#ea0029" />
       <pointLight position={[0, 0, 4]} intensity={0.7} color="#ffce8a" />
+      <pointLight position={[0, 0, -2]} intensity={1.2} color="#ea0029" distance={8} decay={1.5} />
 
       <Suspense fallback={null}>
         <Sculpture progressRef={progressRef} lite={lite} />
       </Suspense>
       <Rig progressRef={progressRef} />
 
-      {/* Gold needs reflections to read as gold — keep env on mobile too */}
       <Environment preset={lite ? 'sunset' : 'warehouse'} />
     </Canvas>
   )
