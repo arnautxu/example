@@ -40,10 +40,10 @@ export const COPY: Record<Lang, Copy> = {
       eyebrow: 'Un projecte de PalSec Agcy.',
       h: {
         l1: 'Webs a mida',
-        l2: 'per a clíniques, despatxos',
-        l3: 'i marques que es preocupen pel detall.',
+        l2: 'per a marques que rebutgen',
+        l3: 'el disseny per defecte.',
       },
-      sub: 'Som el WebLab de PalSec Agency. Dissenyem i programem webs des de zero per a professionals i empreses que volen ser percebuts amb la mateixa cura amb què treballen. Cap plantilla. Cap WordPress. Cap producte enllaunat. Cada projecte: codi propi, disseny únic, llançament en 6 a 8 setmanes.',
+      sub: 'Som el WebLab de PalSec Agency. Dissenyem i programem webs des de zero per a marques i empreses que volen ser percebudes amb la mateixa cura amb què treballen. Cap plantilla. Cap WordPress. Cap producte enllaunat. Cada projecte: codi propi, disseny únic, llançament en 6 a 8 setmanes.',
       smallTag: 'PalSec Agency · WebLab',
     },
     manifesto: {
@@ -53,13 +53,14 @@ export const COPY: Record<Lang, Copy> = {
     },
     works: {
       head: 'Projectes Recents',
-      sub: '4 webs en producció · 2024–2025',
+      sub: '5 webs en producció · 2024–2025',
       rowSuffix: 'visita la web',
       items: [
-        { name: 'Estudi Dental Carrera', tag: 'Salut · Web', yr: '2025', url: 'https://estudi-dental-carrera.vercel.app' },
+        { name: 'Neutral Estudio', tag: 'Estudi · Web', yr: '2025', url: 'https://neutralestudio.es' },
+        { name: 'Estudi Dental Carrera', tag: 'Marca · Web', yr: '2025', url: 'https://estudi-dental-carrera.vercel.app' },
         { name: 'PalSec Agency', tag: 'Marca · Web', yr: '2025', url: 'https://www.palsec.agency' },
-        { name: 'Global Fisio', tag: 'Salut · Web', yr: '2024', url: 'https://global-fisio.vercel.app' },
-        { name: 'iPediatria', tag: 'Pediatria · Web', yr: '2024', url: 'https://i-pediatria.vercel.app' },
+        { name: 'Global Fisio', tag: 'Marca · Web', yr: '2024', url: 'https://global-fisio.vercel.app' },
+        { name: 'iPediatria', tag: 'Marca · Web', yr: '2024', url: 'https://i-pediatria.vercel.app' },
       ],
     },
     quote: {
@@ -112,10 +113,10 @@ export const COPY: Record<Lang, Copy> = {
       eyebrow: 'A PalSec Agcy. project',
       h: {
         l1: 'Bespoke websites',
-        l2: 'for clinics, practices',
-        l3: 'and brands that care about detail.',
+        l2: 'for brands that reject',
+        l3: 'the default.',
       },
-      sub: "We're the WebLab of PalSec Agency. We design and code websites from scratch for professionals and companies who want to be seen with the same care they put into their work. No templates. No WordPress. No off-the-shelf products. Every project: our own code, unique design, shipped in 6 to 8 weeks.",
+      sub: "We're the WebLab of PalSec Agency. We design and code websites from scratch for brands and companies who want to be seen with the same care they put into their work. No templates. No WordPress. No off-the-shelf products. Every project: our own code, unique design, shipped in 6 to 8 weeks.",
       smallTag: 'PalSec Agency · WebLab',
     },
     manifesto: {
@@ -125,13 +126,14 @@ export const COPY: Record<Lang, Copy> = {
     },
     works: {
       head: 'Recent Work',
-      sub: '4 sites in production · 2024–2025',
+      sub: '5 sites in production · 2024–2025',
       rowSuffix: 'visit site',
       items: [
-        { name: 'Estudi Dental Carrera', tag: 'Healthcare · Web', yr: '2025', url: 'https://estudi-dental-carrera.vercel.app' },
+        { name: 'Neutral Estudio', tag: 'Studio · Web', yr: '2025', url: 'https://neutralestudio.es' },
+        { name: 'Estudi Dental Carrera', tag: 'Brand · Web', yr: '2025', url: 'https://estudi-dental-carrera.vercel.app' },
         { name: 'PalSec Agency', tag: 'Brand · Web', yr: '2025', url: 'https://www.palsec.agency' },
-        { name: 'Global Fisio', tag: 'Healthcare · Web', yr: '2024', url: 'https://global-fisio.vercel.app' },
-        { name: 'iPediatria', tag: 'Pediatrics · Web', yr: '2024', url: 'https://i-pediatria.vercel.app' },
+        { name: 'Global Fisio', tag: 'Brand · Web', yr: '2024', url: 'https://global-fisio.vercel.app' },
+        { name: 'iPediatria', tag: 'Brand · Web', yr: '2024', url: 'https://i-pediatria.vercel.app' },
       ],
     },
     quote: {
