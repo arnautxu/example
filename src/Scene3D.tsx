@@ -1,4 +1,4 @@
-import { useRef, useMemo, forwardRef, useImperativeHandle } from 'react'
+import { useRef, useMemo, forwardRef, useImperativeHandle, useEffect, useState } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { Environment, MeshTransmissionMaterial, Float } from '@react-three/drei'
 import * as THREE from 'three'
@@ -8,15 +8,15 @@ export type Scene3DHandle = {
 }
 
 type RigProps = { progressRef: React.MutableRefObject<number> }
+type SculptProps = RigProps & { lite: boolean }
 
-// Six camera waypoints — one per scene. Position + look-at target.
 const WAYPOINTS: Array<{ pos: [number, number, number]; look: [number, number, number] }> = [
-  { pos: [0, 0, 6.5], look: [0, 0, 0] },         // 0 title
-  { pos: [3.6, 1.2, 4.8], look: [0.6, 0.4, 0] }, // 1 manifesto
-  { pos: [-2.4, -1.8, 5.2], look: [0, 0, 0] },   // 2 works
-  { pos: [0, 2.4, 3.4], look: [0, 0, 0] },       // 3 quote
-  { pos: [-3.2, 0.8, 5.0], look: [-0.4, 0, 0] }, // 4 services
-  { pos: [0.8, -0.6, 7.6], look: [0, 0, 0] },    // 5 contact
+  { pos: [0, 0, 6.5], look: [0, 0, 0] },
+  { pos: [3.6, 1.2, 4.8], look: [0.6, 0.4, 0] },
+  { pos: [-2.4, -1.8, 5.2], look: [0, 0, 0] },
+  { pos: [0, 2.4, 3.4], look: [0, 0, 0] },
+  { pos: [-3.2, 0.8, 5.0], look: [-0.4, 0, 0] },
+  { pos: [0.8, -0.6, 7.6], look: [0, 0, 0] },
 ]
 
 function Rig({ progressRef }: RigProps) {
@@ -31,7 +31,7 @@ function Rig({ progressRef }: RigProps) {
     const t = Math.min(Math.max(p, 0), 1) * segs
     const i = Math.min(Math.floor(t), segs - 1)
     const local = t - i
-    const ease = local * local * (3 - 2 * local) // smoothstep
+    const ease = local * local * (3 - 2 * local)
 
     const a = WAYPOINTS[i]
     const b = WAYPOINTS[i + 1]
@@ -46,7 +46,7 @@ function Rig({ progressRef }: RigProps) {
       a.look[2] + (b.look[2] - a.look[2]) * ease,
     )
 
-    const k = 1 - Math.pow(0.001, delta) // smoothing
+    const k = 1 - Math.pow(0.001, delta)
     curPos.lerp(tmpPos, k)
     curLook.lerp(tmpLook, k)
 
@@ -57,7 +57,7 @@ function Rig({ progressRef }: RigProps) {
   return null
 }
 
-function Sculpture({ progressRef }: RigProps) {
+function Sculpture({ progressRef, lite }: SculptProps) {
   const knot = useRef<THREE.Mesh>(null!)
   const ring = useRef<THREE.Mesh>(null!)
   const shards = useRef<THREE.Group>(null!)
@@ -89,44 +89,58 @@ function Sculpture({ progressRef }: RigProps) {
     }
   })
 
-  const shardMats = useMemo(() => Array.from({ length: 9 }, (_, i) => i), [])
+  const shardCount = lite ? 5 : 9
+  const shardIdx = useMemo(() => Array.from({ length: shardCount }, (_, i) => i), [shardCount])
+
+  const knotGeoArgs: [number, number, number, number, number, number] = lite
+    ? [1.05, 0.32, 120, 16, 2, 3]
+    : [1.05, 0.32, 220, 32, 2, 3]
 
   return (
     <group>
-      {/* Central glass torus knot — the hero object */}
       <Float speed={1.2} rotationIntensity={0.3} floatIntensity={0.5}>
         <mesh ref={knot}>
-          <torusKnotGeometry args={[1.05, 0.32, 220, 32, 2, 3]} />
-          <MeshTransmissionMaterial
-            backside
-            samples={6}
-            resolution={512}
-            transmission={1}
-            roughness={0.06}
-            thickness={1.2}
-            ior={1.45}
-            chromaticAberration={0.18}
-            anisotropy={0.4}
-            distortion={0.2}
-            distortionScale={0.4}
-            temporalDistortion={0.1}
-            color="#fff5ec"
-            attenuationColor="#f25c4c"
-            attenuationDistance={1.2}
-          />
+          <torusKnotGeometry args={knotGeoArgs} />
+          {lite ? (
+            <meshPhysicalMaterial
+              color="#f5d3b8"
+              metalness={0.2}
+              roughness={0.18}
+              clearcoat={1}
+              clearcoatRoughness={0.15}
+              emissive="#3a1a0e"
+              emissiveIntensity={0.4}
+            />
+          ) : (
+            <MeshTransmissionMaterial
+              backside
+              samples={6}
+              resolution={512}
+              transmission={1}
+              roughness={0.06}
+              thickness={1.2}
+              ior={1.45}
+              chromaticAberration={0.18}
+              anisotropy={0.4}
+              distortion={0.2}
+              distortionScale={0.4}
+              temporalDistortion={0.1}
+              color="#fff5ec"
+              attenuationColor="#f25c4c"
+              attenuationDistance={1.2}
+            />
+          )}
         </mesh>
       </Float>
 
-      {/* Outer thin ring — accent */}
       <mesh ref={ring} rotation={[Math.PI / 2.4, 0, 0]}>
-        <torusGeometry args={[2.4, 0.008, 16, 240]} />
+        <torusGeometry args={[2.4, 0.008, 16, lite ? 120 : 240]} />
         <meshBasicMaterial color="#f25c4c" />
       </mesh>
 
-      {/* Orbiting metallic shards */}
       <group ref={shards}>
-        {shardMats.map((i) => {
-          const angle = (i / 9) * Math.PI * 2
+        {shardIdx.map((i) => {
+          const angle = (i / shardCount) * Math.PI * 2
           const r = 2.9 + (i % 3) * 0.18
           return (
             <mesh
@@ -145,7 +159,6 @@ function Sculpture({ progressRef }: RigProps) {
         })}
       </group>
 
-      {/* Backdrop disc — adds depth, catches accent light */}
       <mesh position={[0, 0, -3.5]} scale={[14, 14, 1]}>
         <circleGeometry args={[1, 64]} />
         <meshStandardMaterial color="#1c1814" roughness={1} metalness={0} />
@@ -154,8 +167,26 @@ function Sculpture({ progressRef }: RigProps) {
   )
 }
 
+function useIsLite() {
+  const [lite, setLite] = useState(() => {
+    if (typeof window === 'undefined') return false
+    const narrow = window.matchMedia('(max-width: 820px)').matches
+    const coarse = window.matchMedia('(pointer: coarse)').matches
+    const lowMem = (navigator as any).deviceMemory && (navigator as any).deviceMemory <= 4
+    return narrow || coarse || lowMem
+  })
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 820px), (pointer: coarse)')
+    const onChange = () => setLite(mq.matches)
+    mq.addEventListener?.('change', onChange)
+    return () => mq.removeEventListener?.('change', onChange)
+  }, [])
+  return lite
+}
+
 const Scene3D = forwardRef<Scene3DHandle>((_, ref) => {
   const progressRef = useRef(0)
+  const lite = useIsLite()
 
   useImperativeHandle(ref, () => ({
     setProgress: (t: number) => {
@@ -165,23 +196,24 @@ const Scene3D = forwardRef<Scene3DHandle>((_, ref) => {
 
   return (
     <Canvas
-      dpr={[1, 1.8]}
-      gl={{ antialias: true, alpha: false }}
+      dpr={lite ? [1, 1.25] : [1, 1.8]}
+      gl={{ antialias: !lite, alpha: false, powerPreference: 'high-performance' }}
       camera={{ fov: 38, position: [0, 0, 6.5] }}
+      frameloop="always"
       style={{ background: 'transparent' }}
     >
       <color attach="background" args={['#100e0c']} />
-      <fog attach="fog" args={['#100e0c', 8, 22]} />
+      {!lite && <fog attach="fog" args={['#100e0c', 8, 22]} />}
 
-      <ambientLight intensity={0.35} />
+      <ambientLight intensity={lite ? 0.55 : 0.35} />
       <directionalLight position={[4, 5, 3]} intensity={1.4} color="#fff2e0" />
       <directionalLight position={[-3, -2, -2]} intensity={0.6} color="#f25c4c" />
       <pointLight position={[0, 0, 4]} intensity={0.6} color="#ffd9c2" />
 
-      <Sculpture progressRef={progressRef} />
+      <Sculpture progressRef={progressRef} lite={lite} />
       <Rig progressRef={progressRef} />
 
-      <Environment preset="warehouse" />
+      {!lite && <Environment preset="warehouse" />}
     </Canvas>
   )
 })

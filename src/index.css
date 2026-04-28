@@ -87,8 +87,29 @@ body {
   z-index: 2;
   display: grid;
   grid-template-rows: auto 1fr auto;
-  padding: clamp(20px, 3vw, 36px);
+  padding: clamp(16px, 3vw, 36px);
+  padding-top: max(clamp(16px, 3vw, 36px), env(safe-area-inset-top));
+  padding-bottom: max(clamp(16px, 3vw, 36px), env(safe-area-inset-bottom));
   pointer-events: none;
+}
+
+/* Readability scrim — radial vignette + bottom gradient. Subtle on desktop,
+   stronger on mobile where content is denser against the 3D. */
+.stage__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 40%, transparent 0%, oklch(0.16 0.008 60 / 0.35) 70%, oklch(0.16 0.008 60 / 0.65) 100%),
+    linear-gradient(to bottom, transparent 50%, oklch(0.16 0.008 60 / 0.55) 100%);
+}
+@media (max-width: 820px) {
+  .stage__scrim {
+    background:
+      radial-gradient(ellipse at 50% 40%, oklch(0.16 0.008 60 / 0.55) 0%, oklch(0.16 0.008 60 / 0.78) 70%, oklch(0.16 0.008 60 / 0.92) 100%),
+      linear-gradient(to bottom, oklch(0.16 0.008 60 / 0.4) 0%, oklch(0.16 0.008 60 / 0.85) 100%);
+  }
 }
 
 .stage__overlay > * {
@@ -582,4 +603,53 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .botbar__hint .dot { animation: none; }
+}
+
+/* ---------- Mobile refinement ---------- */
+@media (max-width: 820px) {
+  .topbar__nav { display: none; }
+  .topbar { font-size: 11px; }
+  .topbar__mark { font-size: 16px; }
+
+  .scene__inner { padding: 0 18px; }
+
+  .s-title__h {
+    font-size: clamp(44px, 13vw, 84px);
+    line-height: 0.92;
+  }
+  .s-title__sub { grid-template-columns: 1fr; gap: 10px; }
+  .s-title__sub p { font-size: 14px; }
+
+  .s-manifesto__h { font-size: clamp(22px, 5.6vw, 32px); line-height: 1.15; }
+  .s-manifesto__label { font-size: 10px; }
+
+  .s-works__head { padding-bottom: 10px; }
+  .s-works__head h2 { font-size: 22px; }
+  .s-works__head span { font-size: 10px; }
+  .s-works__row {
+    grid-template-columns: 24px 1fr auto;
+    gap: 12px;
+    padding: 12px 0;
+  }
+  .s-works__row .name { font-size: 16px; }
+  .s-works__row .name i { display: none; }
+  .s-works__row .tag { display: none; }
+  .s-works__row .yr { font-size: 11px; }
+
+  .s-quote blockquote { font-size: clamp(24px, 6.4vw, 36px); line-height: 1.15; }
+  .s-quote cite { margin-top: 18px; font-size: 10px; }
+
+  .s-services__h { font-size: 20px; padding-bottom: 12px; }
+  .s-services__h em { display: none; }
+  .s-services__cell { padding: 16px; min-height: 0; gap: 10px; }
+  .s-services__cell h3 { font-size: 16px; }
+  .s-services__cell ul { font-size: 12px; }
+
+  .s-contact__h { font-size: clamp(36px, 11vw, 64px); line-height: 0.96; }
+  .s-contact__col span { font-size: 9px; }
+  .s-contact__col a, .s-contact__col p { font-size: 13px; }
+
+  .botbar { font-size: 10px; }
+  .botbar__counter b { font-size: 32px; }
+  .botbar__hint { gap: 6px; }
 }

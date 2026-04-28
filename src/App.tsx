@@ -117,6 +117,8 @@ export default function App() {
           <Scene3D ref={sceneRef} />
         </div>
 
+        <div className="stage__scrim" aria-hidden />
+
         <div className="stage__overlay">
           <header className="topbar">
             <div className="topbar__mark">
