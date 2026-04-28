@@ -652,4 +652,9 @@ body {
   .botbar { font-size: 10px; }
   .botbar__counter b { font-size: 32px; }
   .botbar__hint { gap: 6px; }
+
+  /* On mobile, scenes anchor to top so tall content (Practice) doesn't
+     overflow up into the topbar. */
+  .scenes { align-items: start; }
+  .scene { align-items: start; padding-top: 12px; }
 }

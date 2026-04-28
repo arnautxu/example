@@ -103,13 +103,13 @@ function Sculpture({ progressRef, lite }: SculptProps) {
           <torusKnotGeometry args={knotGeoArgs} />
           {lite ? (
             <meshPhysicalMaterial
-              color="#f5d3b8"
-              metalness={0.2}
-              roughness={0.18}
+              color="#f25c4c"
+              metalness={0.15}
+              roughness={0.22}
               clearcoat={1}
-              clearcoatRoughness={0.15}
-              emissive="#3a1a0e"
-              emissiveIntensity={0.4}
+              clearcoatRoughness={0.18}
+              emissive="#7a1a10"
+              emissiveIntensity={0.55}
             />
           ) : (
             <MeshTransmissionMaterial
