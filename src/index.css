@@ -98,9 +98,9 @@ body {
 }
 
 .stage__overlay {
-  position: absolute;
+  position: fixed;
   inset: 0;
-  z-index: 5; /* above .scroll-proxy so links can be clicked */
+  z-index: 5; /* above .scroll-proxy (z 4) so links can be clicked */
   display: grid;
   grid-template-rows: 1fr auto;
   padding: clamp(16px, 3vw, 36px);

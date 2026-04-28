@@ -177,8 +177,9 @@ export default function App() {
         </div>
 
         <div className="stage__scrim" aria-hidden />
+      </div>
 
-        <div className="stage__overlay">
+      <div className="stage__overlay">
           <div className="scenes">
             <section className="scene" ref={sceneEls(0)}>
               <div className="scene__inner s-title">
@@ -255,7 +256,7 @@ export default function App() {
                       <h3>{s.h}</h3>
                       <ul>
                         {s.list.map((x) => (
-                          <li key={x}>— {x}</li>
+                          <li key={x}>· {x}</li>
                         ))}
                       </ul>
                     </div>
@@ -290,11 +291,25 @@ export default function App() {
                   </div>
                   <div className="s-contact__col">
                     <span>{t.contact.cols.dept}</span>
-                    <p>{t.contact.deptValue}</p>
+                    <a
+                      href="https://www.palsec.agency"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onWheel={forwardWheel}
+                    >
+                      {t.contact.deptValue}
+                    </a>
                   </div>
                   <div className="s-contact__col">
                     <span>{t.contact.cols.hq}</span>
-                    <p>{t.contact.hqValue}</p>
+                    <a
+                      href="https://www.google.com/maps/place/Catalonia"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onWheel={forwardWheel}
+                    >
+                      {t.contact.hqValue}
+                    </a>
                   </div>
                 </div>
               </div>
@@ -304,7 +319,7 @@ export default function App() {
           <footer className="botbar">
             <div className="botbar__counter">
               <b ref={counterNumRef}>01</b>
-              <em>/ 06 —</em>
+              <em>/ 06 ·</em>
               <em ref={sceneLabelRef}>{t.sceneLabels[0]}</em>
             </div>
             <div className="botbar__hint">
@@ -313,7 +328,6 @@ export default function App() {
             </div>
           </footer>
         </div>
-      </div>
 
       <div className="scroll-proxy" ref={proxyRef}>
         <div className="scroll-proxy__track" />

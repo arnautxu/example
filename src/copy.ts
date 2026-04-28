@@ -30,7 +30,7 @@ export type Copy = {
 
 export const COPY: Record<Lang, Copy> = {
   ca: {
-    bootLabel: 'PalSec WebLab — Carregant',
+    bootLabel: 'PalSec WebLab · Carregant',
     topbarTagline: 'Un departament de PalSec Agency',
     toggles: { lang: { ca: 'CA', en: 'EN' }, theme: { day: 'Dia', night: 'Nit' } },
     sceneLabels: ['Inici', 'Manifest', 'Projectes', 'Cita', 'Servei', 'Contacte'],
@@ -39,29 +39,29 @@ export const COPY: Record<Lang, Copy> = {
     title: {
       eyebrow: 'Un projecte de PalSec Agcy.',
       h: { l1: 'PalSec, dissenyem', l2: 'webs que es recorden', l3: 'més enllà del scroll.' },
-      sub: 'Som el WebLab de PalSec Agency: un equip dedicat exclusivament al disseny i desenvolupament de llocs web a mida — amb cura per la tipografia, el ritme i els detalls que fan que una web sembli un objecte i no una plantilla.',
+      sub: 'Som el WebLab de PalSec Agency: un equip dedicat exclusivament al disseny i desenvolupament de llocs web a mida, amb cura per la tipografia, el ritme i els detalls que fan que una web sembli un objecte i no una plantilla.',
       smallTag: 'PalSec Agency · WebLab',
     },
     manifesto: {
       label: 'Manifest',
       section: '§ 01 / 06',
-      h: "No fem webs que reaccionen — fem webs que responen. Amb pes, amb temps, amb la mena de cura que fa pensar que algú s'hi ha preocupat.",
+      h: "No fem webs que reaccionen. Fem webs que responen. Amb pes, amb temps, amb la mena de cura que fa pensar que algú s'hi ha preocupat.",
     },
     works: {
       head: 'Projectes Seleccionats',
       sub: 'Una mostra del nostre treball',
-      rowSuffix: '— visita la web',
+      rowSuffix: 'visita la web',
       items: [
         { name: 'Estudi Dental Carrera', tag: 'Salut · Web', yr: '2025', url: 'https://estudi-dental-carrera.vercel.app' },
         { name: 'PalSec Agency', tag: 'Marca · Web', yr: '2025', url: 'https://www.palsec.agency' },
         { name: 'Global Fisio', tag: 'Salut · Web', yr: '2024', url: 'https://global-fisio.vercel.app' },
-        { name: 'I-Pediatria', tag: 'Pediatria · Web', yr: '2024', url: 'https://i-pediatria.vercel.app' },
+        { name: 'iPediatria', tag: 'Pediatria · Web', yr: '2024', url: 'https://i-pediatria.vercel.app' },
       ],
     },
     quote: {
       open: 'Una bona web no demana atenció.',
       close: "Se la guanya, a poc a poc, per ser digna d'una segona mirada.",
-      cite: "— Apunt d'estudi Núm. 14",
+      cite: "Apunt d'estudi Núm. 14",
     },
     services: {
       h: 'Servei',
@@ -75,13 +75,13 @@ export const COPY: Record<Lang, Copy> = {
     contact: {
       h: { l1: 'Tens un projecte?', l2pre: '', l2under: 'Comencem', l2post: ' a parlar-ne.' },
       cols: { email: 'Correu', agency: 'Agència', dept: 'Departament', hq: 'Seu' },
-      deptValue: 'WebLab — PalSec Agency',
+      deptValue: 'WebLab · PalSec Agency',
       hqValue: 'Catalunya',
     },
   },
 
   en: {
-    bootLabel: 'PalSec WebLab — Loading',
+    bootLabel: 'PalSec WebLab · Loading',
     topbarTagline: 'A PalSec Agency department',
     toggles: { lang: { ca: 'CA', en: 'EN' }, theme: { day: 'Day', night: 'Night' } },
     sceneLabels: ['Index', 'Manifesto', 'Works', 'Statement', 'Practice', 'Contact'],
@@ -89,7 +89,7 @@ export const COPY: Record<Lang, Copy> = {
 
     title: {
       eyebrow: 'A PalSec Agcy. project',
-      h: { l1: 'PalSec — websites', l2: 'that stay with you', l3: 'beyond the scroll.' },
+      h: { l1: 'PalSec, websites', l2: 'that stay with you', l3: 'beyond the scroll.' },
       sub: "We are PalSec Agency's WebLab — a team dedicated exclusively to bespoke web design and development, with care for typography, rhythm, and the details that make a website feel like an object, not a template.",
       smallTag: 'PalSec Agency · WebLab',
     },
@@ -106,7 +106,7 @@ export const COPY: Record<Lang, Copy> = {
         { name: 'Estudi Dental Carrera', tag: 'Healthcare · Web', yr: '2025', url: 'https://estudi-dental-carrera.vercel.app' },
         { name: 'PalSec Agency', tag: 'Brand · Web', yr: '2025', url: 'https://www.palsec.agency' },
         { name: 'Global Fisio', tag: 'Healthcare · Web', yr: '2024', url: 'https://global-fisio.vercel.app' },
-        { name: 'I-Pediatria', tag: 'Pediatrics · Web', yr: '2024', url: 'https://i-pediatria.vercel.app' },
+        { name: 'iPediatria', tag: 'Pediatrics · Web', yr: '2024', url: 'https://i-pediatria.vercel.app' },
       ],
     },
     quote: {
@@ -126,7 +126,7 @@ export const COPY: Record<Lang, Copy> = {
     contact: {
       h: { l1: 'Have a project?', l2pre: "Let's ", l2under: 'begin', l2post: ' a conversation.' },
       cols: { email: 'Email', agency: 'Agency', dept: 'Department', hq: 'HQ' },
-      deptValue: 'WebLab — PalSec Agency',
+      deptValue: 'WebLab · PalSec Agency',
       hqValue: 'Catalonia',
     },
   },
