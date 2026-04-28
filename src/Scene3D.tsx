@@ -234,9 +234,9 @@ function Backdrop() {
             float rim = exp(-length(rimUv) * 4.5) * 0.22;
             col += vec3(0.95, 0.55, 0.30) * rim;
 
-            // Film grain
+            // Film grain — kept very low so it reads as texture, not noise
             float n = hash(vUv * 1024.0 + floor(uTime * 8.0));
-            col += (n - 0.5) * 0.022;
+            col += (n - 0.5) * 0.010;
 
             // Edge vignette
             float v = smoothstep(0.55, 1.05, r);
@@ -299,20 +299,20 @@ function Sculpture({ progressRef, lite }: SculptProps) {
             ) : (
               <MeshTransmissionMaterial
                 backside
-                samples={6}
-                resolution={512}
+                samples={8}
+                resolution={1024}
                 transmission={1}
-                roughness={0.06}
-                thickness={1.2}
-                ior={1.45}
-                chromaticAberration={0.18}
-                anisotropy={0.4}
-                distortion={0.2}
-                distortionScale={0.4}
-                temporalDistortion={0.1}
-                color="#fff5ec"
+                roughness={0.18}
+                thickness={1.4}
+                ior={1.4}
+                chromaticAberration={0.02}
+                anisotropy={0.1}
+                distortion={0.05}
+                distortionScale={0.2}
+                temporalDistortion={0}
+                color="#ffe7d8"
                 attenuationColor="#ea0029"
-                attenuationDistance={1.0}
+                attenuationDistance={1.6}
               />
             )}
           </mesh>
@@ -367,11 +367,12 @@ const Scene3D = forwardRef<Scene3DHandle>((_, ref) => {
       style={{ background: 'transparent' }}
     >
       <color attach="background" args={['#100806']} />
-      <ambientLight intensity={lite ? 0.45 : 0.3} color="#fff1d6" />
-      <directionalLight position={[4, 5, 3]} intensity={1.5} color="#fff2cf" />
-      <directionalLight position={[-3, -2, -2]} intensity={0.8} color="#ea0029" />
-      <pointLight position={[0, 0, 4]} intensity={0.7} color="#ffce8a" />
-      <pointLight position={[0, 0, -2]} intensity={1.2} color="#ea0029" distance={8} decay={1.5} />
+      {/* Soft, mostly diffuse lighting — avoid saturated red lights that
+          create harsh red/black contrast on the transmission material. */}
+      <ambientLight intensity={lite ? 0.75 : 0.6} color="#ffe6cc" />
+      <directionalLight position={[3, 4, 4]} intensity={0.9} color="#fff0d8" />
+      <directionalLight position={[-3, 1, 2]} intensity={0.5} color="#ffd0b0" />
+      <pointLight position={[0, 0, 5]} intensity={0.4} color="#ffd9b8" />
 
       <Suspense fallback={null}>
         <Sculpture progressRef={progressRef} lite={lite} />
