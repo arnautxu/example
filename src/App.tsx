@@ -65,7 +65,16 @@ export default function App() {
           trigger: '.scroll-proxy__track',
           start: 'top top',
           end: 'bottom bottom',
-          scrub: 1.2,
+          // Smooth scrub: more lag = softer, less twitchy
+          scrub: 2.2,
+          // Snap to scene boundaries when user stops scrolling so transitions
+          // always finish cleanly, with their own momentum.
+          snap: {
+            snapTo: 1 / (TOTAL - 1),
+            duration: { min: 0.4, max: 0.9 },
+            ease: 'power2.inOut',
+            delay: 0.08,
+          },
           onUpdate: (self) => {
             const p = self.progress
             sceneRef.current?.setProgress(p)
@@ -83,22 +92,20 @@ export default function App() {
         },
       })
 
-      // Vertical wipe: a horizontal line sweeps downward across the
-      // viewport. Above it, A is visible. Below it, B. The line moves
-      // from top (B fully hidden, A fully visible) to bottom (A fully
-      // hidden, B fully visible) over the same duration — A and B are
-      // perfectly complementary so no pixel ever shows both.
+      // Vertical wipe driven by a single eased curve. A and B share a
+      // moving boundary line, so no pixel ever holds both scenes at once.
+      // The wipe spans most of the segment for a slow, cinematic feel.
       for (let i = 0; i < TOTAL - 1; i++) {
         const a = sceneRefs.current[i]
         const b = sceneRefs.current[i + 1]
         tl.to(
           a,
-          { clipPath: 'inset(0% 0% 100% 0%)', duration: 0.5, ease: 'power2.inOut' },
-          i + 0.45,
+          { clipPath: 'inset(0% 0% 100% 0%)', duration: 0.85, ease: 'power3.inOut' },
+          i + 0.10,
         ).to(
           b,
-          { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.5, ease: 'power2.inOut' },
-          i + 0.45,
+          { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.85, ease: 'power3.inOut' },
+          i + 0.10,
         )
       }
     })
