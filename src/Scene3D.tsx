@@ -298,21 +298,20 @@ function Sculpture({ progressRef, lite }: SculptProps) {
               />
             ) : (
               <MeshTransmissionMaterial
-                backside
-                samples={8}
+                samples={20}
                 resolution={1024}
                 transmission={1}
-                roughness={0.18}
-                thickness={1.4}
-                ior={1.4}
-                chromaticAberration={0.02}
-                anisotropy={0.1}
-                distortion={0.05}
-                distortionScale={0.2}
+                roughness={0.22}
+                thickness={0.6}
+                ior={1.38}
+                chromaticAberration={0}
+                anisotropy={0}
+                distortion={0}
+                distortionScale={0}
                 temporalDistortion={0}
-                color="#ffe7d8"
+                color="#ffe2cf"
                 attenuationColor="#ea0029"
-                attenuationDistance={1.6}
+                attenuationDistance={2.6}
               />
             )}
           </mesh>
