@@ -65,13 +65,8 @@ function useLogoGeometry(lite: boolean): THREE.BufferGeometry {
   return useMemo(() => {
     const shapes: THREE.Shape[] = []
     for (const path of data.paths) {
-      const fill = (path.userData as any)?.style?.fill
-      // Only extrude the red wordmark (PALSEC). Skip the dark "agcy." subtext
-      // so the silhouette reads cleanly at any size.
-      if (typeof fill === 'string' && fill.toLowerCase() === '#ea0029') {
-        const ss = SVGLoader.createShapes(path)
-        for (const s of ss) shapes.push(s)
-      }
+      const ss = SVGLoader.createShapes(path)
+      for (const s of ss) shapes.push(s)
     }
 
     const depth = lite ? 22 : 28
