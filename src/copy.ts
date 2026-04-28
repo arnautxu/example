@@ -53,7 +53,7 @@ export const COPY: Record<Lang, Copy> = {
     },
     works: {
       head: 'Projectes Recents',
-      sub: '5 webs en producció · 2024–2025',
+      sub: 'Una selecció · 2024–2025',
       rowSuffix: 'visita la web',
       items: [
         { name: 'Neutral Estudio', tag: 'Estudi · Web', yr: '2025', url: 'https://neutralestudio.es' },
@@ -126,7 +126,7 @@ export const COPY: Record<Lang, Copy> = {
     },
     works: {
       head: 'Recent Work',
-      sub: '5 sites in production · 2024–2025',
+      sub: 'A selection · 2024–2025',
       rowSuffix: 'visit site',
       items: [
         { name: 'Neutral Estudio', tag: 'Studio · Web', yr: '2025', url: 'https://neutralestudio.es' },
