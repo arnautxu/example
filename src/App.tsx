@@ -53,8 +53,12 @@ export default function App() {
   useEffect(() => {
     if (booting) return
     const ctx = gsap.context(() => {
-      gsap.set(sceneRefs.current, { opacity: 0, y: 60 })
-      gsap.set(sceneRefs.current[0], { opacity: 1, y: 0 })
+      // All scenes are at full opacity. The transition is a vertical wipe
+      // implemented with clip-path: at any given moment, A occupies the
+      // top portion of the viewport and B occupies the bottom — they
+      // share a moving horizontal split line, never the same pixel.
+      gsap.set(sceneRefs.current, { opacity: 1, clipPath: 'inset(100% 0% 0% 0%)' })
+      gsap.set(sceneRefs.current[0], { clipPath: 'inset(0% 0% 0% 0%)' })
 
       const tl = gsap.timeline({
         scrollTrigger: {
@@ -79,22 +83,22 @@ export default function App() {
         },
       })
 
-      // Soft crossfade with vertical separation: A fades out moving up
-      // while B fades in coming from below. Brief overlap window, but the
-      // two scenes are 120px apart vertically when both partially visible,
-      // so the texts never sit on top of each other.
+      // Vertical wipe: a horizontal line sweeps downward across the
+      // viewport. Above it, A is visible. Below it, B. The line moves
+      // from top (B fully hidden, A fully visible) to bottom (A fully
+      // hidden, B fully visible) over the same duration — A and B are
+      // perfectly complementary so no pixel ever shows both.
       for (let i = 0; i < TOTAL - 1; i++) {
         const a = sceneRefs.current[i]
         const b = sceneRefs.current[i + 1]
         tl.to(
           a,
-          { opacity: 0, y: -60, duration: 0.32, ease: 'power2.in' },
-          i + 0.50,
-        ).fromTo(
+          { clipPath: 'inset(0% 0% 100% 0%)', duration: 0.5, ease: 'power2.inOut' },
+          i + 0.45,
+        ).to(
           b,
-          { opacity: 0, y: 60 },
-          { opacity: 1, y: 0, duration: 0.32, ease: 'power2.out' },
-          i + 0.58,
+          { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.5, ease: 'power2.inOut' },
+          i + 0.45,
         )
       }
     })
