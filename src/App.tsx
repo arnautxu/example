@@ -253,11 +253,11 @@ export default function App() {
                 <div className="s-contact__grid">
                   <div className="s-contact__col">
                     <span>Correu</span>
-                    <a href="mailto:weblab@palsec.agency">weblab@palsec.agency</a>
+                    <a href="mailto:info@palsec.agency">info@palsec.agency</a>
                   </div>
                   <div className="s-contact__col">
                     <span>Agència</span>
-                    <a href="mailto:hola@palsec.agency">hola@palsec.agency</a>
+                    <a href="https://www.palsec.agency" target="_blank" rel="noopener noreferrer">www.palsec.agency</a>
                   </div>
                   <div className="s-contact__col">
                     <span>Departament</span>

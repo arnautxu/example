@@ -1,6 +1,7 @@
-import { useRef, useMemo, forwardRef, useImperativeHandle, useEffect, useState } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { useRef, useMemo, forwardRef, useImperativeHandle, useEffect, useState, Suspense } from 'react'
+import { Canvas, useFrame, useLoader } from '@react-three/fiber'
 import { Environment, MeshTransmissionMaterial, Float } from '@react-three/drei'
+import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
 import * as THREE from 'three'
 
 export type Scene3DHandle = {
@@ -57,20 +58,70 @@ function Rig({ progressRef }: RigProps) {
   return null
 }
 
+// Build a single, centered, normalized BufferGeometry from the PalSec logo SVG.
+function useLogoGeometry(lite: boolean): THREE.BufferGeometry {
+  const data = useLoader(SVGLoader, '/palsec-logo.svg')
+
+  return useMemo(() => {
+    const shapes: THREE.Shape[] = []
+    for (const path of data.paths) {
+      const fill = (path.userData as any)?.style?.fill
+      // Only extrude the red wordmark (PALSEC). Skip the dark "agcy." subtext
+      // so the silhouette reads cleanly at any size.
+      if (typeof fill === 'string' && fill.toLowerCase() === '#ea0029') {
+        const ss = SVGLoader.createShapes(path)
+        for (const s of ss) shapes.push(s)
+      }
+    }
+
+    const depth = lite ? 22 : 28
+    const geom = new THREE.ExtrudeGeometry(shapes, {
+      depth,
+      bevelEnabled: true,
+      bevelSegments: lite ? 2 : 4,
+      bevelSize: 1.4,
+      bevelThickness: 1.4,
+      curveSegments: lite ? 8 : 14,
+    })
+
+    // SVG y-axis is flipped vs three.js
+    geom.scale(1, -1, 1)
+    geom.computeBoundingBox()
+    const bb = geom.boundingBox!
+    const cx = (bb.min.x + bb.max.x) / 2
+    const cy = (bb.min.y + bb.max.y) / 2
+    const cz = (bb.min.z + bb.max.z) / 2
+    geom.translate(-cx, -cy, -cz)
+
+    // Normalize size so the logo's longest side fits ~3 units
+    const sizeX = bb.max.x - bb.min.x
+    const target = 3.4
+    const k = target / sizeX
+    geom.scale(k, k, k)
+
+    geom.computeVertexNormals()
+    return geom
+  }, [data, lite])
+}
+
 function Sculpture({ progressRef, lite }: SculptProps) {
-  const knot = useRef<THREE.Mesh>(null!)
+  const logoGroup = useRef<THREE.Group>(null!)
   const ring = useRef<THREE.Mesh>(null!)
   const shards = useRef<THREE.Group>(null!)
+
+  const logoGeom = useLogoGeometry(lite)
 
   useFrame((state, delta) => {
     const p = progressRef.current
     const t = state.clock.elapsedTime
 
-    if (knot.current) {
-      knot.current.rotation.y += delta * 0.18
-      knot.current.rotation.x = Math.sin(t * 0.3) * 0.2 + p * Math.PI * 1.2
-      const s = 1 + Math.sin(t * 0.6) * 0.04 - p * 0.15
-      knot.current.scale.setScalar(s)
+    if (logoGroup.current) {
+      // Same kind of motion the torus knot had: gentle Y spin + sinusoidal X
+      // tilt + scroll-driven X rotation + subtle scale breathing
+      logoGroup.current.rotation.y += delta * 0.18
+      logoGroup.current.rotation.x = Math.sin(t * 0.3) * 0.18 + p * Math.PI * 1.1
+      const s = 1 + Math.sin(t * 0.6) * 0.04 - p * 0.12
+      logoGroup.current.scale.setScalar(s)
     }
 
     if (ring.current) {
@@ -92,56 +143,56 @@ function Sculpture({ progressRef, lite }: SculptProps) {
   const shardCount = lite ? 5 : 9
   const shardIdx = useMemo(() => Array.from({ length: shardCount }, (_, i) => i), [shardCount])
 
-  const knotGeoArgs: [number, number, number, number, number, number] = lite
-    ? [1.05, 0.32, 120, 16, 2, 3]
-    : [1.05, 0.32, 220, 32, 2, 3]
-
   return (
     <group>
+      {/* PalSec logo, extruded — same material & motion as the previous knot */}
       <Float speed={1.2} rotationIntensity={0.3} floatIntensity={0.5}>
-        <mesh ref={knot}>
-          <torusKnotGeometry args={knotGeoArgs} />
-          {lite ? (
-            <meshPhysicalMaterial
-              color="#f25c4c"
-              metalness={0.15}
-              roughness={0.22}
-              clearcoat={1}
-              clearcoatRoughness={0.18}
-              emissive="#7a1a10"
-              emissiveIntensity={0.55}
-            />
-          ) : (
-            <MeshTransmissionMaterial
-              backside
-              samples={6}
-              resolution={512}
-              transmission={1}
-              roughness={0.06}
-              thickness={1.2}
-              ior={1.45}
-              chromaticAberration={0.18}
-              anisotropy={0.4}
-              distortion={0.2}
-              distortionScale={0.4}
-              temporalDistortion={0.1}
-              color="#fff5ec"
-              attenuationColor="#f25c4c"
-              attenuationDistance={1.2}
-            />
-          )}
-        </mesh>
+        <group ref={logoGroup}>
+          <mesh geometry={logoGeom} castShadow>
+            {lite ? (
+              <meshPhysicalMaterial
+                color="#f25c4c"
+                metalness={0.15}
+                roughness={0.22}
+                clearcoat={1}
+                clearcoatRoughness={0.18}
+                emissive="#7a1a10"
+                emissiveIntensity={0.55}
+              />
+            ) : (
+              <MeshTransmissionMaterial
+                backside
+                samples={6}
+                resolution={512}
+                transmission={1}
+                roughness={0.06}
+                thickness={1.2}
+                ior={1.45}
+                chromaticAberration={0.18}
+                anisotropy={0.4}
+                distortion={0.2}
+                distortionScale={0.4}
+                temporalDistortion={0.1}
+                color="#fff5ec"
+                attenuationColor="#ea0029"
+                attenuationDistance={1.2}
+              />
+            )}
+          </mesh>
+        </group>
       </Float>
 
+      {/* Outer thin ring — accent */}
       <mesh ref={ring} rotation={[Math.PI / 2.4, 0, 0]}>
-        <torusGeometry args={[2.4, 0.008, 16, lite ? 120 : 240]} />
-        <meshBasicMaterial color="#f25c4c" />
+        <torusGeometry args={[2.6, 0.008, 16, lite ? 120 : 240]} />
+        <meshBasicMaterial color="#ea0029" />
       </mesh>
 
+      {/* Orbiting metallic shards */}
       <group ref={shards}>
         {shardIdx.map((i) => {
           const angle = (i / shardCount) * Math.PI * 2
-          const r = 2.9 + (i % 3) * 0.18
+          const r = 3.0 + (i % 3) * 0.18
           return (
             <mesh
               key={i}
@@ -150,7 +201,7 @@ function Sculpture({ progressRef, lite }: SculptProps) {
             >
               <boxGeometry args={[1, 1, 1]} />
               <meshStandardMaterial
-                color={i % 4 === 0 ? '#f25c4c' : '#f5ede0'}
+                color={i % 4 === 0 ? '#ea0029' : '#f5ede0'}
                 metalness={0.9}
                 roughness={0.18}
               />
@@ -159,6 +210,7 @@ function Sculpture({ progressRef, lite }: SculptProps) {
         })}
       </group>
 
+      {/* Backdrop disc */}
       <mesh position={[0, 0, -3.5]} scale={[14, 14, 1]}>
         <circleGeometry args={[1, 64]} />
         <meshStandardMaterial color="#1c1814" roughness={1} metalness={0} />
@@ -207,10 +259,12 @@ const Scene3D = forwardRef<Scene3DHandle>((_, ref) => {
 
       <ambientLight intensity={lite ? 0.55 : 0.35} />
       <directionalLight position={[4, 5, 3]} intensity={1.4} color="#fff2e0" />
-      <directionalLight position={[-3, -2, -2]} intensity={0.6} color="#f25c4c" />
+      <directionalLight position={[-3, -2, -2]} intensity={0.6} color="#ea0029" />
       <pointLight position={[0, 0, 4]} intensity={0.6} color="#ffd9c2" />
 
-      <Sculpture progressRef={progressRef} lite={lite} />
+      <Suspense fallback={null}>
+        <Sculpture progressRef={progressRef} lite={lite} />
+      </Suspense>
       <Rig progressRef={progressRef} />
 
       {!lite && <Environment preset="warehouse" />}
