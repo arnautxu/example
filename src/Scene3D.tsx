@@ -1,6 +1,6 @@
 import { useRef, useMemo, forwardRef, useImperativeHandle, useEffect, useState, Suspense } from 'react'
 import { Canvas, useFrame, useLoader } from '@react-three/fiber'
-import { Environment, MeshTransmissionMaterial, Float } from '@react-three/drei'
+import { Environment, Float } from '@react-three/drei'
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
 import * as THREE from 'three'
 
@@ -99,10 +99,91 @@ function useLogoGeometry(lite: boolean): THREE.BufferGeometry {
   }, [data, lite])
 }
 
+// Build a soft circular sprite for dust particles — single radial gradient.
+function makeDustTexture() {
+  const size = 64
+  const c = document.createElement('canvas')
+  c.width = c.height = size
+  const ctx = c.getContext('2d')!
+  const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2)
+  g.addColorStop(0, 'rgba(255, 230, 160, 1)')
+  g.addColorStop(0.4, 'rgba(255, 200, 110, 0.6)')
+  g.addColorStop(1, 'rgba(255, 180, 80, 0)')
+  ctx.fillStyle = g
+  ctx.fillRect(0, 0, size, size)
+  const tex = new THREE.CanvasTexture(c)
+  tex.colorSpace = THREE.SRGBColorSpace
+  return tex
+}
+
+function GoldenDust({ progressRef, lite }: SculptProps) {
+  const ref = useRef<THREE.Points>(null!)
+  const count = lite ? 220 : 700
+  const tex = useMemo(makeDustTexture, [])
+
+  const { positions, basePositions, speeds } = useMemo(() => {
+    const positions = new Float32Array(count * 3)
+    const basePositions = new Float32Array(count * 3)
+    const speeds = new Float32Array(count)
+    for (let i = 0; i < count; i++) {
+      // Spherical-ish cloud, biased toward a wide flat ring, but with depth
+      const angle = Math.random() * Math.PI * 2
+      const r = 2.2 + Math.random() * 2.4
+      const y = (Math.random() - 0.5) * 2.6
+      const z = Math.sin(angle) * r + (Math.random() - 0.5) * 0.6
+      const x = Math.cos(angle) * r + (Math.random() - 0.5) * 0.6
+      positions[i * 3 + 0] = x
+      positions[i * 3 + 1] = y
+      positions[i * 3 + 2] = z
+      basePositions[i * 3 + 0] = x
+      basePositions[i * 3 + 1] = y
+      basePositions[i * 3 + 2] = z
+      speeds[i] = 0.4 + Math.random() * 1.2
+    }
+    return { positions, basePositions, speeds }
+  }, [count])
+
+  useFrame((state) => {
+    if (!ref.current) return
+    const p = progressRef.current
+    const t = state.clock.elapsedTime
+    const arr = (ref.current.geometry.attributes.position.array as Float32Array)
+
+    for (let i = 0; i < count; i++) {
+      const i3 = i * 3
+      const sp = speeds[i]
+      arr[i3 + 1] = basePositions[i3 + 1] + Math.sin(t * sp + i) * 0.18
+      arr[i3 + 0] = basePositions[i3 + 0] + Math.sin(t * sp * 0.6 + i * 1.3) * 0.12
+      arr[i3 + 2] = basePositions[i3 + 2] + Math.cos(t * sp * 0.7 + i * 0.7) * 0.12
+    }
+    ref.current.geometry.attributes.position.needsUpdate = true
+
+    // Slow drifting rotation, biased by scroll progress
+    ref.current.rotation.y = -t * 0.04 + p * Math.PI * 0.6
+    ref.current.rotation.x = Math.sin(t * 0.05) * 0.1 - p * 0.2
+  })
+
+  return (
+    <points ref={ref}>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+      </bufferGeometry>
+      <pointsMaterial
+        size={lite ? 0.07 : 0.085}
+        map={tex}
+        color="#ffd271"
+        transparent
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+        sizeAttenuation
+      />
+    </points>
+  )
+}
+
 function Sculpture({ progressRef, lite }: SculptProps) {
   const logoGroup = useRef<THREE.Group>(null!)
   const ring = useRef<THREE.Mesh>(null!)
-  const shards = useRef<THREE.Group>(null!)
 
   const logoGeom = useLogoGeometry(lite)
 
@@ -111,8 +192,6 @@ function Sculpture({ progressRef, lite }: SculptProps) {
     const t = state.clock.elapsedTime
 
     if (logoGroup.current) {
-      // Same kind of motion the torus knot had: gentle Y spin + sinusoidal X
-      // tilt + scroll-driven X rotation + subtle scale breathing
       logoGroup.current.rotation.y += delta * 0.18
       logoGroup.current.rotation.x = Math.sin(t * 0.3) * 0.18 + p * Math.PI * 1.1
       const s = 1 + Math.sin(t * 0.6) * 0.04 - p * 0.12
@@ -123,92 +202,41 @@ function Sculpture({ progressRef, lite }: SculptProps) {
       ring.current.rotation.z += delta * 0.06
       ring.current.rotation.x = -0.4 + p * 0.6
     }
-
-    if (shards.current) {
-      shards.current.rotation.y = -t * 0.04 + p * Math.PI
-      shards.current.children.forEach((c, i) => {
-        const phase = i * 0.7 + t * 0.4
-        c.position.y = Math.sin(phase) * 0.3 + (i - 4) * 0.05
-        ;(c as THREE.Mesh).rotation.x = phase
-        ;(c as THREE.Mesh).rotation.z = phase * 0.5
-      })
-    }
   })
-
-  const shardCount = lite ? 5 : 9
-  const shardIdx = useMemo(() => Array.from({ length: shardCount }, (_, i) => i), [shardCount])
 
   return (
     <group>
-      {/* PalSec logo, extruded — same material & motion as the previous knot */}
+      {/* PalSec logo, extruded — gold material */}
       <Float speed={1.2} rotationIntensity={0.3} floatIntensity={0.5}>
         <group ref={logoGroup}>
           <mesh geometry={logoGeom} castShadow>
-            {lite ? (
-              <meshPhysicalMaterial
-                color="#f25c4c"
-                metalness={0.15}
-                roughness={0.22}
-                clearcoat={1}
-                clearcoatRoughness={0.18}
-                emissive="#7a1a10"
-                emissiveIntensity={0.55}
-              />
-            ) : (
-              <MeshTransmissionMaterial
-                backside
-                samples={6}
-                resolution={512}
-                transmission={1}
-                roughness={0.06}
-                thickness={1.2}
-                ior={1.45}
-                chromaticAberration={0.18}
-                anisotropy={0.4}
-                distortion={0.2}
-                distortionScale={0.4}
-                temporalDistortion={0.1}
-                color="#fff5ec"
-                attenuationColor="#ea0029"
-                attenuationDistance={1.2}
-              />
-            )}
+            <meshPhysicalMaterial
+              color="#d4a23a"
+              metalness={1}
+              roughness={lite ? 0.32 : 0.22}
+              clearcoat={0.6}
+              clearcoatRoughness={0.25}
+              emissive="#3a2200"
+              emissiveIntensity={0.25}
+              envMapIntensity={1.4}
+            />
           </mesh>
         </group>
       </Float>
 
-      {/* Outer thin ring — accent */}
+      {/* Outer thin ring — gold accent */}
       <mesh ref={ring} rotation={[Math.PI / 2.4, 0, 0]}>
         <torusGeometry args={[2.6, 0.008, 16, lite ? 120 : 240]} />
-        <meshBasicMaterial color="#ea0029" />
+        <meshBasicMaterial color="#ffd271" />
       </mesh>
 
-      {/* Orbiting metallic shards */}
-      <group ref={shards}>
-        {shardIdx.map((i) => {
-          const angle = (i / shardCount) * Math.PI * 2
-          const r = 3.0 + (i % 3) * 0.18
-          return (
-            <mesh
-              key={i}
-              position={[Math.cos(angle) * r, 0, Math.sin(angle) * r]}
-              scale={[0.06 + (i % 4) * 0.015, 0.45 + (i % 3) * 0.18, 0.06]}
-            >
-              <boxGeometry args={[1, 1, 1]} />
-              <meshStandardMaterial
-                color={i % 4 === 0 ? '#ea0029' : '#f5ede0'}
-                metalness={0.9}
-                roughness={0.18}
-              />
-            </mesh>
-          )
-        })}
-      </group>
+      {/* Golden dust cloud — replaces the orbiting shards */}
+      <GoldenDust progressRef={progressRef} lite={lite} />
 
       {/* Backdrop disc */}
       <mesh position={[0, 0, -3.5]} scale={[14, 14, 1]}>
         <circleGeometry args={[1, 64]} />
-        <meshStandardMaterial color="#1c1814" roughness={1} metalness={0} />
+        <meshStandardMaterial color="#15110c" roughness={1} metalness={0} />
       </mesh>
     </group>
   )
@@ -252,17 +280,18 @@ const Scene3D = forwardRef<Scene3DHandle>((_, ref) => {
       <color attach="background" args={['#100e0c']} />
       {!lite && <fog attach="fog" args={['#100e0c', 8, 22]} />}
 
-      <ambientLight intensity={lite ? 0.55 : 0.35} />
-      <directionalLight position={[4, 5, 3]} intensity={1.4} color="#fff2e0" />
-      <directionalLight position={[-3, -2, -2]} intensity={0.6} color="#ea0029" />
-      <pointLight position={[0, 0, 4]} intensity={0.6} color="#ffd9c2" />
+      <ambientLight intensity={lite ? 0.4 : 0.25} color="#fff1d6" />
+      <directionalLight position={[4, 5, 3]} intensity={1.6} color="#fff2cf" />
+      <directionalLight position={[-3, -2, -2]} intensity={0.5} color="#a86a1a" />
+      <pointLight position={[0, 0, 4]} intensity={0.7} color="#ffce8a" />
 
       <Suspense fallback={null}>
         <Sculpture progressRef={progressRef} lite={lite} />
       </Suspense>
       <Rig progressRef={progressRef} />
 
-      {!lite && <Environment preset="warehouse" />}
+      {/* Gold needs reflections to read as gold — keep env on mobile too */}
+      <Environment preset={lite ? 'sunset' : 'warehouse'} />
     </Canvas>
   )
 })

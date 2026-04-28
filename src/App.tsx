@@ -136,7 +136,7 @@ export default function App() {
           <div className="scenes">
             <section className="scene" ref={sceneEls(0)}>
               <div className="scene__inner s-title">
-                <div className="s-title__eyebrow">Disseny i desenvolupament web · Des de Catalunya</div>
+                <div className="s-title__eyebrow">Un projecte de PalSec Agcy.</div>
                 <h1 className="s-title__h">
                   PalSec<i>,</i> dissenyem<br />
                   webs que es <i>recorden</i><br />
