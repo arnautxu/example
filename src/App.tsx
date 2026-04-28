@@ -79,19 +79,23 @@ export default function App() {
         },
       })
 
+      // Sequential fade: scene A fades out FULLY before B starts fading in,
+      // so two scenes are never simultaneously visible.
       for (let i = 0; i < TOTAL - 1; i++) {
         const a = sceneRefs.current[i]
         const b = sceneRefs.current[i + 1]
         tl.to(
           a,
-          { opacity: 0, y: -32, duration: 0.5, ease: 'power2.in' },
-          i + 0.45,
-        ).fromTo(
-          b,
-          { opacity: 0, y: 32 },
-          { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' },
-          i + 0.55,
+          { opacity: 0, y: -28, duration: 0.40, ease: 'power2.in' },
+          i + 0.40,
         )
+          .set(a, { opacity: 0 }, i + 0.80)
+          .fromTo(
+            b,
+            { opacity: 0, y: 28 },
+            { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out' },
+            i + 0.85,
+          )
       }
     })
 
