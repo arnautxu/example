@@ -53,7 +53,7 @@ export default function App() {
   useEffect(() => {
     if (booting) return
     const ctx = gsap.context(() => {
-      gsap.set(sceneRefs.current, { opacity: 0, y: 28 })
+      gsap.set(sceneRefs.current, { opacity: 0, y: 60 })
       gsap.set(sceneRefs.current[0], { opacity: 1, y: 0 })
 
       const tl = gsap.timeline({
@@ -79,18 +79,23 @@ export default function App() {
         },
       })
 
-      // Hard swap at the midpoint: scene A glides upward at full opacity,
-      // then at exactly t=i+0.85 we toggle — A goes invisible, B becomes
-      // fully visible at its starting position, and B glides into place.
-      // Net effect: one (and only one) scene's text is on screen at every
-      // moment of the scroll, with the upward motion masking the cut.
+      // Soft crossfade with vertical separation: A fades out moving up
+      // while B fades in coming from below. Brief overlap window, but the
+      // two scenes are 120px apart vertically when both partially visible,
+      // so the texts never sit on top of each other.
       for (let i = 0; i < TOTAL - 1; i++) {
         const a = sceneRefs.current[i]
         const b = sceneRefs.current[i + 1]
-        tl.to(a, { y: -28, duration: 0.45, ease: 'power2.in' }, i + 0.40)
-          .set(a, { opacity: 0 }, i + 0.85)
-          .set(b, { opacity: 1, y: 28 }, i + 0.85)
-          .to(b, { y: 0, duration: 0.45, ease: 'power2.out' }, i + 0.85)
+        tl.to(
+          a,
+          { opacity: 0, y: -60, duration: 0.32, ease: 'power2.in' },
+          i + 0.50,
+        ).fromTo(
+          b,
+          { opacity: 0, y: 60 },
+          { opacity: 1, y: 0, duration: 0.32, ease: 'power2.out' },
+          i + 0.58,
+        )
       }
     })
 
