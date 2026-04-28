@@ -27,14 +27,9 @@ function Rig({ progressRef }: RigProps) {
   const tmpLook = useMemo(() => new THREE.Vector3(), [])
   const curPos = useMemo(() => new THREE.Vector3(0, 0, 6.5), [])
   const curLook = useMemo(() => new THREE.Vector3(0, 0, 0), [])
-  const pSmoothRef = useRef(0)
 
   useFrame((state, delta) => {
-    // Smooth the scroll progress per-frame so 3D motion is fluid even
-    // when the GSAP scrub steps the value at scroll-event boundaries.
-    const ks = 1 - Math.pow(0.001, delta * 0.5)
-    pSmoothRef.current += (progressRef.current - pSmoothRef.current) * ks
-    const p = pSmoothRef.current
+    const p = progressRef.current
     const segs = WAYPOINTS.length - 1
     const t = Math.min(Math.max(p, 0), 1) * segs
     const i = Math.min(Math.floor(t), segs - 1)
@@ -127,7 +122,6 @@ function makeBokehTexture() {
 function BokehField({ progressRef, lite }: SculptProps) {
   const groupRef = useRef<THREE.Group>(null!)
   const tex = useMemo(makeBokehTexture, [])
-  const pSmoothRef = useRef(0)
 
   const orbs = useMemo(() => {
     const count = lite ? 26 : 48
@@ -156,11 +150,9 @@ function BokehField({ progressRef, lite }: SculptProps) {
     })
   }, [lite])
 
-  useFrame((state, delta) => {
+  useFrame((state) => {
     const t = state.clock.elapsedTime
-    const ks = 1 - Math.pow(0.001, delta * 0.5)
-    pSmoothRef.current += (progressRef.current - pSmoothRef.current) * ks
-    const p = pSmoothRef.current
+    const p = progressRef.current
     if (groupRef.current) {
       groupRef.current.rotation.y = -t * 0.018 + p * Math.PI * 0.3
       groupRef.current.rotation.x = Math.sin(t * 0.04) * 0.06 - p * 0.1
@@ -278,14 +270,11 @@ function Backdrop({ theme }: { theme: Theme }) {
 function Sculpture({ progressRef, lite, theme }: SculptProps) {
   const logoGroup = useRef<THREE.Group>(null!)
   const ring = useRef<THREE.Mesh>(null!)
-  const pSmoothRef = useRef(0)
 
   const logoGeom = useLogoGeometry(lite)
 
   useFrame((state, delta) => {
-    const ks = 1 - Math.pow(0.001, delta * 0.5)
-    pSmoothRef.current += (progressRef.current - pSmoothRef.current) * ks
-    const p = pSmoothRef.current
+    const p = progressRef.current
     const t = state.clock.elapsedTime
 
     if (logoGroup.current) {

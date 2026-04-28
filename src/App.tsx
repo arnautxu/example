@@ -53,7 +53,7 @@ export default function App() {
   useEffect(() => {
     if (booting) return
     const ctx = gsap.context(() => {
-      gsap.set(sceneRefs.current, { opacity: 0, y: 24, clipPath: 'none' })
+      gsap.set(sceneRefs.current, { opacity: 0, y: 24 })
       gsap.set(sceneRefs.current[0], { opacity: 1, y: 0 })
 
       const tl = gsap.timeline({
