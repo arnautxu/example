@@ -79,8 +79,10 @@ function useLogoGeometry(lite: boolean): THREE.BufferGeometry {
       curveSegments: lite ? 8 : 14,
     })
 
-    // SVG y-axis is flipped vs three.js
-    geom.scale(1, -1, 1)
+    // SVG Y points down, three.js Y points up. Use a rigid rotation rather
+    // than a negative scale so winding is preserved and holes (inner letter
+    // counters) are detected correctly by ExtrudeGeometry.
+    geom.rotateX(Math.PI)
     geom.computeBoundingBox()
     const bb = geom.boundingBox!
     const cx = (bb.min.x + bb.max.x) / 2
@@ -99,16 +101,17 @@ function useLogoGeometry(lite: boolean): THREE.BufferGeometry {
   }, [data, lite])
 }
 
-// Build a soft circular sprite for dust particles — single radial gradient.
+// Soft, low-contrast dust speck — fades to nothing at the edges. No bright
+// core (that's what makes particles read as stars rather than dust).
 function makeDustTexture() {
   const size = 64
   const c = document.createElement('canvas')
   c.width = c.height = size
   const ctx = c.getContext('2d')!
   const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2)
-  g.addColorStop(0, 'rgba(255, 230, 160, 1)')
-  g.addColorStop(0.4, 'rgba(255, 200, 110, 0.6)')
-  g.addColorStop(1, 'rgba(255, 180, 80, 0)')
+  g.addColorStop(0, 'rgba(220, 180, 110, 0.55)')
+  g.addColorStop(0.45, 'rgba(200, 160, 90, 0.18)')
+  g.addColorStop(1, 'rgba(180, 140, 70, 0)')
   ctx.fillStyle = g
   ctx.fillRect(0, 0, size, size)
   const tex = new THREE.CanvasTexture(c)
@@ -118,63 +121,81 @@ function makeDustTexture() {
 
 function GoldenDust({ progressRef, lite }: SculptProps) {
   const ref = useRef<THREE.Points>(null!)
-  const count = lite ? 220 : 700
+  const count = lite ? 260 : 900
   const tex = useMemo(makeDustTexture, [])
 
-  const { positions, basePositions, speeds } = useMemo(() => {
+  // positions, base positions, per-mote phase, per-mote size, per-mote tint
+  const { positions, basePositions, speeds, sizes, colors } = useMemo(() => {
     const positions = new Float32Array(count * 3)
     const basePositions = new Float32Array(count * 3)
     const speeds = new Float32Array(count)
+    const sizes = new Float32Array(count)
+    const colors = new Float32Array(count * 3)
+
     for (let i = 0; i < count; i++) {
-      // Spherical-ish cloud, biased toward a wide flat ring, but with depth
+      // Volumetric cloud — fills space around the logo with depth
       const angle = Math.random() * Math.PI * 2
-      const r = 2.2 + Math.random() * 2.4
-      const y = (Math.random() - 0.5) * 2.6
-      const z = Math.sin(angle) * r + (Math.random() - 0.5) * 0.6
-      const x = Math.cos(angle) * r + (Math.random() - 0.5) * 0.6
+      const r = 1.4 + Math.pow(Math.random(), 0.7) * 3.2
+      const y = (Math.random() - 0.5) * 3.6
+      const z = Math.sin(angle) * r + (Math.random() - 0.5) * 1.2
+      const x = Math.cos(angle) * r + (Math.random() - 0.5) * 1.2
       positions[i * 3 + 0] = x
       positions[i * 3 + 1] = y
       positions[i * 3 + 2] = z
       basePositions[i * 3 + 0] = x
       basePositions[i * 3 + 1] = y
       basePositions[i * 3 + 2] = z
-      speeds[i] = 0.4 + Math.random() * 1.2
+
+      speeds[i] = 0.15 + Math.random() * 0.35
+
+      // Wide variation in size — real dust isn't uniform
+      sizes[i] = 0.4 + Math.pow(Math.random(), 2) * 1.6
+
+      // Tint range: warm gold → pale champagne → slightly desaturated
+      const warmth = 0.7 + Math.random() * 0.3
+      colors[i * 3 + 0] = 0.85 * warmth
+      colors[i * 3 + 1] = 0.7 * warmth
+      colors[i * 3 + 2] = 0.45 * warmth * (0.8 + Math.random() * 0.4)
     }
-    return { positions, basePositions, speeds }
+    return { positions, basePositions, speeds, sizes, colors }
   }, [count])
 
   useFrame((state) => {
     if (!ref.current) return
     const p = progressRef.current
     const t = state.clock.elapsedTime
-    const arr = (ref.current.geometry.attributes.position.array as Float32Array)
+    const arr = ref.current.geometry.attributes.position.array as Float32Array
 
+    // Slow, near-gravityless drift — like dust suspended in still air
     for (let i = 0; i < count; i++) {
       const i3 = i * 3
       const sp = speeds[i]
-      arr[i3 + 1] = basePositions[i3 + 1] + Math.sin(t * sp + i) * 0.18
-      arr[i3 + 0] = basePositions[i3 + 0] + Math.sin(t * sp * 0.6 + i * 1.3) * 0.12
-      arr[i3 + 2] = basePositions[i3 + 2] + Math.cos(t * sp * 0.7 + i * 0.7) * 0.12
+      arr[i3 + 0] = basePositions[i3 + 0] + Math.sin(t * sp * 0.4 + i * 1.7) * 0.08
+      arr[i3 + 1] = basePositions[i3 + 1] + Math.sin(t * sp * 0.5 + i) * 0.12
+      arr[i3 + 2] = basePositions[i3 + 2] + Math.cos(t * sp * 0.45 + i * 0.7) * 0.08
     }
     ref.current.geometry.attributes.position.needsUpdate = true
 
-    // Slow drifting rotation, biased by scroll progress
-    ref.current.rotation.y = -t * 0.04 + p * Math.PI * 0.6
-    ref.current.rotation.x = Math.sin(t * 0.05) * 0.1 - p * 0.2
+    // Very slow rotation so motion doesn't feel mechanical
+    ref.current.rotation.y = -t * 0.012 + p * Math.PI * 0.25
+    ref.current.rotation.x = Math.sin(t * 0.03) * 0.05 - p * 0.08
   })
 
   return (
     <points ref={ref}>
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+        <bufferAttribute attach="attributes-color" args={[colors, 3]} />
+        <bufferAttribute attach="attributes-size" args={[sizes, 1]} />
       </bufferGeometry>
       <pointsMaterial
-        size={lite ? 0.07 : 0.085}
+        size={lite ? 0.045 : 0.055}
         map={tex}
-        color="#ffd271"
+        alphaMap={tex}
+        vertexColors
         transparent
+        opacity={0.65}
         depthWrite={false}
-        blending={THREE.AdditiveBlending}
         sizeAttenuation
       />
     </points>
