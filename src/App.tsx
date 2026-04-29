@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import Lenis from 'lenis'
 import Scene3D, { type Scene3DHandle } from './Scene3D'
 import { COPY, type Lang } from './copy'
 
@@ -50,6 +51,32 @@ export default function App() {
     }
   }, [])
 
+  // Lenis smooth scroll: intercepts native wheel/touch events and outputs a
+  // continuously-eased scroll position. ScrollTrigger reads from it so the
+  // 3D timeline progresses fluidly between scroll events instead of stepping.
+  useEffect(() => {
+    if (booting) return
+    const lenis = new Lenis({
+      lerp: 0.08, // lower = smoother, higher = snappier
+      smoothWheel: true,
+      wheelMultiplier: 0.9,
+      touchMultiplier: 1.2,
+    })
+
+    lenis.on('scroll', ScrollTrigger.update)
+
+    const tickerCb = (time: number) => {
+      lenis.raf(time * 1000)
+    }
+    gsap.ticker.add(tickerCb)
+    gsap.ticker.lagSmoothing(0)
+
+    return () => {
+      gsap.ticker.remove(tickerCb)
+      lenis.destroy()
+    }
+  }, [booting])
+
   useEffect(() => {
     if (booting) return
     const ctx = gsap.context(() => {
@@ -61,7 +88,10 @@ export default function App() {
           trigger: '.scroll-proxy__track',
           start: 'top top',
           end: 'bottom bottom',
-          scrub: 1.2,
+          // Lenis already smooths the scroll source, so we keep scrub low —
+          // the timeline tracks the eased scroll position closely without
+          // double-lagging.
+          scrub: 0.5,
           onUpdate: (self) => {
             const p = self.progress
             sceneRef.current?.setProgress(p)
