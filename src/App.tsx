@@ -157,17 +157,8 @@ export default function App() {
     <>
       <div className={`boot ${!booting ? 'hidden' : ''}`} aria-hidden={!booting}>
         <div className="boot__inner">
-          <div className="boot__brand">Vueik<span>.</span></div>
-          <div className="boot__vessel">
-            <div
-              className="boot__water"
-              style={{ height: `${bootCount}%` }}
-            >
-              <span className="boot__wave-a" />
-              <span className="boot__wave-b" />
-            </div>
-            <span className="boot__pct">{bootCount}</span>
-          </div>
+          <div style={{ opacity: 0.6 }}>{t.bootLabel}</div>
+          <div className="boot__count">{String(bootCount).padStart(3, '0')}</div>
         </div>
       </div>
 
