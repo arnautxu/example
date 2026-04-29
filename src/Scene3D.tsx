@@ -1,6 +1,6 @@
 import { useRef, useMemo, forwardRef, useImperativeHandle, useEffect, useState, Suspense } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { Environment, MeshTransmissionMaterial, Float } from '@react-three/drei'
+import { Environment, Float } from '@react-three/drei'
 import * as THREE from 'three'
 
 export type Scene3DHandle = {
@@ -272,68 +272,53 @@ function Sculpture({ progressRef, lite, theme }: SculptProps) {
       <Float speed={1.2} rotationIntensity={0.3} floatIntensity={0.5}>
         <group ref={helixGroup}>
           {[0, Math.PI * 0.66, Math.PI * 1.33].map((phase, strandIndex) =>
-            Array.from({ length: 15 }, (_, i) => {
-              const tSeg = i / 14
-              const angle = phase + tSeg * Math.PI * 2.1
-              const radius = 0.72 + Math.sin(tSeg * Math.PI) * 0.12
+            Array.from({ length: lite ? 8 : 10 }, (_, i) => {
+              const count = lite ? 7 : 9
+              const tSeg = i / count
+              const angle = phase + tSeg * Math.PI * 2.18
+              const radius = 0.68 + Math.sin(tSeg * Math.PI) * 0.14
               const x = Math.cos(angle) * radius
               const y = -1.9 + tSeg * 3.8
-              const z = Math.sin(angle) * radius * 0.42
+              const z = Math.sin(angle) * radius * 0.38
               const rotY = angle + Math.PI / 2
-              const scaleY = 0.42 + Math.sin(tSeg * Math.PI) * 0.26
-              const refIndex = strandIndex * 15 + i
+              const scaleY = 0.52 + Math.sin(tSeg * Math.PI) * 0.34
+              const refIndex = strandIndex * (lite ? 8 : 10) + i
 
               return (
                 <mesh
                   key={`${strandIndex}-${i}`}
                   ref={(el) => { ribbonRefs.current[refIndex] = el }}
                   position={[x, y, z]}
-                  rotation={[0, rotY, Math.PI / 10]}
-                  scale={[0.08, scaleY, 0.28]}
+                  rotation={[0, rotY, Math.PI / 9]}
+                  scale={[0.12, scaleY, 0.36]}
                 >
                   <boxGeometry args={[1, 1, 1]} />
-                  {lite ? (
-                    <meshPhysicalMaterial
-                      color={strandIndex === 1 ? '#ff4a61' : '#d91732'}
-                      metalness={0}
-                      roughness={0.14}
-                      clearcoat={1}
-                      clearcoatRoughness={0.1}
-                      transmission={0.56}
-                      thickness={0.6}
-                      ior={1.42}
-                      attenuationColor="#ea0029"
-                      attenuationDistance={0.82}
-                      emissive="#320007"
-                      emissiveIntensity={0.22}
-                    />
-                  ) : (
-                    <MeshTransmissionMaterial
-                      samples={12}
-                      resolution={512}
-                      transmission={1}
-                      roughness={0.1}
-                      thickness={0.7}
-                      ior={1.34}
-                      chromaticAberration={0}
-                      anisotropy={0}
-                      distortion={0}
-                      distortionScale={0}
-                      temporalDistortion={0}
-                      color={strandIndex === 1 ? '#ffd5d0' : '#ffd9cf'}
-                      attenuationColor={strandIndex === 1 ? '#ff3d56' : '#ea0029'}
-                      attenuationDistance={1.7}
-                    />
-                  )}
+                  <meshPhysicalMaterial
+                    color={strandIndex === 1 ? '#ff8d94' : '#ffb1af'}
+                    metalness={0}
+                    roughness={lite ? 0.08 : 0.05}
+                    clearcoat={1}
+                    clearcoatRoughness={0.03}
+                    reflectivity={0.95}
+                    transmission={lite ? 0.72 : 0.88}
+                    transparent
+                    opacity={0.96}
+                    thickness={lite ? 0.95 : 1.25}
+                    ior={1.46}
+                    attenuationColor={strandIndex === 1 ? '#ff4058' : '#ea0029'}
+                    attenuationDistance={lite ? 1.25 : 1.85}
+                    emissive="#220005"
+                    emissiveIntensity={0.12}
+                  />
                 </mesh>
               )
             }),
           )}
 
           {[
-            { pos: [0, 0, 0], scale: [0.12, 3.5, 0.12] },
-            { pos: [0, 0.18, 0], scale: [0.05, 2.8, 0.05] },
-            { pos: [0, -0.15, 0], scale: [0.22, 0.32, 0.22] },
+            { pos: [0, 0, 0], scale: [0.1, 3.6, 0.1] },
+            { pos: [0, 0.18, 0], scale: [0.04, 2.7, 0.04] },
+            { pos: [0, -0.15, 0], scale: [0.26, 0.22, 0.26] },
           ].map((spine, i) => (
             <mesh
               key={`spine-${i}`}
@@ -343,11 +328,11 @@ function Sculpture({ progressRef, lite, theme }: SculptProps) {
             >
               <cylinderGeometry args={[1, 1, 1, lite ? 10 : 18]} />
               {i === 0 ? (
-                <meshBasicMaterial color="#ff6b62" transparent opacity={0.16} />
+                <meshBasicMaterial color="#ff8b7f" transparent opacity={0.12} />
               ) : i === 1 ? (
-                <meshBasicMaterial color="#ffd2c2" transparent opacity={0.12} />
+                <meshBasicMaterial color="#ffe6d8" transparent opacity={0.14} />
               ) : (
-                <meshBasicMaterial color="#ff8f79" transparent opacity={0.2} />
+                <meshBasicMaterial color="#ff6d63" transparent opacity={0.22} />
               )}
             </mesh>
           ))}
