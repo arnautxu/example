@@ -271,23 +271,30 @@ export default function App() {
 
             <section className="scene" ref={sceneEls(4)}>
               <div className="scene__inner s-services">
-                <h2 className="s-services__h">
-                  {t.services.h}
-                  <em>{t.services.sub}</em>
-                </h2>
-                <div className="s-services__grid">
+                <header className="s-services__head">
+                  <span className="s-services__kicker">{t.services.sub}</span>
+                  <h2 className="s-services__h">{t.services.h}</h2>
+                </header>
+
+                <ol className="s-services__list">
                   {t.services.cells.map((s) => (
-                    <div className="s-services__cell" key={s.n}>
-                      <div className="idx">{s.n}</div>
-                      <h3>{s.h}</h3>
-                      <ul>
-                        {s.list.map((x) => (
-                          <li key={x}>· {x}</li>
-                        ))}
-                      </ul>
-                    </div>
+                    <li className="s-services__row" key={s.n}>
+                      <span className="s-services__num" aria-hidden>{s.n}</span>
+                      <div className="s-services__body">
+                        <span className="s-services__eye">{s.eyebrow}</span>
+                        <h3 className="s-services__h3">{s.h}</h3>
+                        <div className="s-services__tags">
+                          {s.list.map((x, i) => (
+                            <span key={x}>
+                              {x}
+                              {i < s.list.length - 1 && <i aria-hidden> · </i>}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </li>
                   ))}
-                </div>
+                </ol>
               </div>
             </section>
 

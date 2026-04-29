@@ -1,7 +1,7 @@
 export type Lang = 'ca' | 'en'
 
 type Project = { name: string; tag: string; yr: string; url: string }
-type Service = { n: string; h: string; list: string[] }
+type Service = { n: string; eyebrow: string; h: string; list: string[] }
 
 export type Copy = {
   bootLabel: string
@@ -74,17 +74,20 @@ export const COPY: Record<Lang, Copy> = {
       cells: [
         {
           n: '01',
-          h: 'Webs corporatives. Disseny i copy fets a mida des de la primera línia.',
+          eyebrow: 'Brand websites',
+          h: 'Disseny i copy fets a mida des de la primera línia.',
           list: ['Estratègia', 'Disseny UX/UI', 'Art direction', 'Copy'],
         },
         {
           n: '02',
-          h: 'Codi propi. Sense WordPress, sense temes comprats. La web és teva, no llogada.',
+          eyebrow: 'Bespoke development',
+          h: 'Codi propi. Sense WordPress. La web és teva, no llogada.',
           list: ['Frontend', 'CMS headless', 'Hosting', 'Manteniment'],
         },
         {
           n: '03',
-          h: 'Detalls que es noten. Animació, 3D i micro-interaccions on aporten alguna cosa real.',
+          eyebrow: 'Detail in motion',
+          h: 'Animació, 3D i micro-interaccions on aporten alguna cosa real.',
           list: ['Three.js', 'Motion', 'Micro-interaccions', 'Performance'],
         },
       ],
@@ -147,17 +150,20 @@ export const COPY: Record<Lang, Copy> = {
       cells: [
         {
           n: '01',
-          h: 'Brand websites. Design and copy made from the first line.',
+          eyebrow: 'Brand websites',
+          h: 'Design and copy made from the first line.',
           list: ['Strategy', 'UX/UI Design', 'Art Direction', 'Copy'],
         },
         {
           n: '02',
-          h: "Our own code. No WordPress, no purchased themes. The site is yours, not rented.",
+          eyebrow: 'Bespoke development',
+          h: "Our own code. No WordPress. The site is yours, not rented.",
           list: ['Frontend', 'Headless CMS', 'Hosting', 'Maintenance'],
         },
         {
           n: '03',
-          h: 'Details that show. Animation, 3D, and micro-interactions where they actually help.',
+          eyebrow: 'Detail in motion',
+          h: 'Animation, 3D, and micro-interactions where they actually help.',
           list: ['Three.js', 'Motion', 'Micro-interactions', 'Performance'],
         },
       ],
