@@ -102,9 +102,9 @@ html::-webkit-scrollbar { display: none; }
   padding-bottom: max(clamp(16px, 3vw, 36px), env(safe-area-inset-bottom));
   pointer-events: none; /* let wheel pass through to .scroll-proxy below */
 }
-/* Re-enable interactivity only on actually-clickable elements */
-.stage__overlay .s-works__row,
-.stage__overlay .s-contact__col a {
+/* Re-enable interactivity only on active scene's clickable elements */
+.scene.is-active .s-works__row,
+.scene.is-active .s-contact__col a {
   pointer-events: auto;
 }
 
