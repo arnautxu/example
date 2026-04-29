@@ -77,52 +77,77 @@ export default function App() {
     }
   }, [booting])
 
+  // Active scene index, kept in a ref so updating it during scroll doesn't
+  // re-render the React tree. Initialized to 0 (Inici).
+  const activeIdxRef = useRef(0)
+
   useEffect(() => {
     if (booting) return
     const ctx = gsap.context(() => {
-      gsap.set(sceneRefs.current, { opacity: 0, y: 24 })
+      // Start with only scene 0 visible. The rest are hidden, ready to fade in.
+      gsap.set(sceneRefs.current, { opacity: 0, y: 32 })
       gsap.set(sceneRefs.current[0], { opacity: 1, y: 0 })
 
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: '.scroll-proxy__track',
-          start: 'top top',
-          end: 'bottom bottom',
-          // Lenis already smooths the scroll source, so we keep scrub low —
-          // the timeline tracks the eased scroll position closely without
-          // double-lagging.
-          scrub: 0.5,
-          onUpdate: (self) => {
-            const p = self.progress
-            sceneRef.current?.setProgress(p)
-            if (progressBarRef.current) {
-              progressBarRef.current.style.width = `${p * 100}%`
-            }
-            const idx = Math.min(Math.floor(p * TOTAL), TOTAL - 1)
+      // Helper: snap a scene to its target visibility with a real-time tween.
+      // The tweens are NOT scroll-driven, so they always finish — when the
+      // user stops between two snap points there's exactly one scene visible.
+      const showScene = (idx: number) => {
+        sceneRefs.current.forEach((ref, i) => {
+          if (!ref) return
+          if (i === idx) {
+            gsap.to(ref, {
+              opacity: 1,
+              y: 0,
+              duration: 0.55,
+              ease: 'power2.out',
+              overwrite: 'auto',
+            })
+          } else {
+            gsap.to(ref, {
+              opacity: 0,
+              y: i < idx ? -32 : 32,
+              duration: 0.4,
+              ease: 'power2.in',
+              overwrite: 'auto',
+            })
+          }
+        })
+      }
+
+      // ScrollTrigger drives the BACKGROUND (3D scene + progress bar)
+      // continuously via scrub. Text scene visibility is handled separately
+      // through discrete tweens triggered when the active index changes.
+      ScrollTrigger.create({
+        trigger: '.scroll-proxy__track',
+        start: 'top top',
+        end: 'bottom bottom',
+        scrub: 0.5,
+        onUpdate: (self) => {
+          const p = self.progress
+          // 1. Background — continuous, untouched by the discrete text logic
+          sceneRef.current?.setProgress(p)
+          if (progressBarRef.current) {
+            progressBarRef.current.style.width = `${p * 100}%`
+          }
+
+          // 2. Text scenes — discrete: pick the nearest scene to the
+          //    current progress and only swap when that index changes.
+          const newIdx = Math.min(
+            Math.max(Math.round(p * (TOTAL - 1)), 0),
+            TOTAL - 1,
+          )
+          if (newIdx !== activeIdxRef.current) {
+            activeIdxRef.current = newIdx
+            showScene(newIdx)
             if (counterNumRef.current) {
-              counterNumRef.current.textContent = String(idx + 1).padStart(2, '0')
+              counterNumRef.current.textContent = String(newIdx + 1).padStart(2, '0')
             }
             if (sceneLabelRef.current) {
-              sceneLabelRef.current.textContent = sceneLabelsRef.current[idx]
+              sceneLabelRef.current.textContent = sceneLabelsRef.current[newIdx]
             }
-          },
+          }
         },
       })
-
-      for (let i = 0; i < TOTAL - 1; i++) {
-        const a = sceneRefs.current[i]
-        const b = sceneRefs.current[i + 1]
-        tl.to(
-          a,
-          { opacity: 0, y: -32, duration: 0.5, ease: 'power2.in' },
-          i + 0.45,
-        ).fromTo(
-          b,
-          { opacity: 0, y: 32 },
-          { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' },
-          i + 0.55,
-        )
-      }
     })
 
     ScrollTrigger.refresh()
