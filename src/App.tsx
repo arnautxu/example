@@ -76,11 +76,11 @@ export default function App() {
 
     let animatingUntil = 0
     let currentTargetIdx = 0
+    const INERTIA_HOLD = 280 // ms of silence after last event before unlocking
 
     const goTo = (idx: number) => {
       const clamped = Math.max(0, Math.min(TOTAL - 1, idx))
       if (clamped === currentTargetIdx) return
-      if (Date.now() < animatingUntil) return
       currentTargetIdx = clamped
 
       const maxScroll =
@@ -88,7 +88,7 @@ export default function App() {
       const target = (clamped / (TOTAL - 1)) * maxScroll
       const duration = 0.95
 
-      animatingUntil = Date.now() + duration * 1000 + 80
+      animatingUntil = Date.now() + duration * 1000 + INERTIA_HOLD
       lenis.scrollTo(target, {
         duration,
         easing: (x: number) => 1 - Math.pow(1 - x, 3), // power3.out
@@ -96,10 +96,15 @@ export default function App() {
     }
 
     const onWheel = (e: WheelEvent) => {
-      // Block native scroll completely; we drive scroll only via goTo.
       e.preventDefault()
       if (Math.abs(e.deltaY) < 4) return
-      if (Date.now() < animatingUntil) return
+      // While locked (animation running OR trackpad inertia still flowing),
+      // extend the lock by INERTIA_HOLD so events keep getting absorbed
+      // until the user truly stops.
+      if (Date.now() < animatingUntil) {
+        animatingUntil = Math.max(animatingUntil, Date.now() + INERTIA_HOLD)
+        return
+      }
       goTo(currentTargetIdx + (e.deltaY > 0 ? 1 : -1))
     }
 
@@ -114,7 +119,7 @@ export default function App() {
       const dy = touchStartY - e.touches[0].clientY
       if (Math.abs(dy) > 36) {
         goTo(currentTargetIdx + (dy > 0 ? 1 : -1))
-        touchStartY = null // require a fresh touch for the next step
+        touchStartY = null
       }
     }
     const onTouchEnd = () => {
