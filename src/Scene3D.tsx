@@ -1,6 +1,6 @@
 import { useRef, useMemo, forwardRef, useImperativeHandle, useEffect, useState, Suspense } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { Environment, Float, MeshRefractionMaterial, useEnvironment } from '@react-three/drei'
+import { Environment, Float } from '@react-three/drei'
 import * as THREE from 'three'
 
 export type Scene3DHandle = {
@@ -220,10 +220,6 @@ function Sculpture({ progressRef, lite, theme }: SculptProps) {
   const ribbonRefs = useRef<Array<THREE.Mesh | null>>([])
   const spineRefs  = useRef<Array<THREE.Mesh | null>>([])
 
-  // Environment texture shared with MeshRefractionMaterial
-  const envPreset = theme === 'day' ? 'apartment' : 'warehouse'
-  const env = useEnvironment({ preset: envPreset } as { preset: typeof envPreset })
-
   useFrame((state, delta) => {
     const p = progressRef.current
     const t = state.clock.elapsedTime
@@ -253,12 +249,10 @@ function Sculpture({ progressRef, lite, theme }: SculptProps) {
     }
   })
 
-  const bounces = lite ? 1 : 3
-
   return (
     <group>
       <Backdrop theme={theme} />
-      <Environment map={env} />
+      <Environment preset={theme === 'day' ? 'apartment' : 'warehouse'} />
 
       {/* Helicoidal column with diamond refraction material */}
       <Float speed={1.2} rotationIntensity={0.3} floatIntensity={0.5}>
@@ -285,14 +279,22 @@ function Sculpture({ progressRef, lite, theme }: SculptProps) {
                   scale={[0.12, scaleY, 0.36]}
                 >
                   <boxGeometry args={[1, 1, 1]} />
-                  <MeshRefractionMaterial
-                    envMap={env}
-                    bounces={bounces}
-                    aberrationStrength={0.015}
+                  <meshPhysicalMaterial
+                    color="#ffffff"
+                    metalness={0}
+                    roughness={lite ? 0.02 : 0.0}
+                    clearcoat={1}
+                    clearcoatRoughness={0.01}
+                    transmission={1}
+                    transparent
+                    opacity={0.99}
+                    thickness={lite ? 0.85 : 1.2}
                     ior={2.4}
-                    fresnel={1}
-                    color="white"
-                    toneMapped={false}
+                    dispersion={lite ? 0.006 : 0.02}
+                    attenuationColor="#f3f7ff"
+                    attenuationDistance={lite ? 7 : 12}
+                    specularIntensity={1}
+                    specularColor="#ffffff"
                   />
                 </mesh>
               )
