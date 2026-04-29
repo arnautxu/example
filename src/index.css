@@ -135,15 +135,15 @@ html::-webkit-scrollbar { display: none; }
   .stage__scrim {
     background:
       linear-gradient(to bottom,
-        oklch(0.06 0.010 50 / 0.92) 0%,
-        oklch(0.06 0.010 50 / 0.65) 22%,
-        oklch(0.06 0.010 50 / 0.55) 55%,
-        oklch(0.06 0.010 50 / 0.82) 90%,
-        oklch(0.06 0.010 50 / 0.94) 100%
+        oklch(0.06 0.010 50 / 0.82) 0%,
+        oklch(0.06 0.010 50 / 0.45) 22%,
+        oklch(0.06 0.010 50 / 0.28) 55%,
+        oklch(0.06 0.010 50 / 0.62) 90%,
+        oklch(0.06 0.010 50 / 0.88) 100%
       ),
       radial-gradient(ellipse 95% 80% at 50% 50%,
-        oklch(0.06 0.010 50 / 0.45) 0%,
-        oklch(0.06 0.010 50 / 0.72) 100%
+        oklch(0.06 0.010 50 / 0.18) 0%,
+        oklch(0.06 0.010 50 / 0.42) 100%
       );
   }
 }
@@ -215,9 +215,51 @@ html::-webkit-scrollbar { display: none; }
   letter-spacing: -0.01em;
   text-transform: none;
   color: var(--ink);
+  display: flex;
+  align-items: baseline;
 }
-.topbar__mark span {
+
+/* Each letter: hidden until .is-visible, then slides in staggered */
+.topbar__mark-letter {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: calc(var(--i) * 0.06s);
+}
+.topbar__mark.is-visible .topbar__mark-letter {
+  opacity: 1;
+  transform: translateY(0);
+  /* After entry, run the gentle float wave */
+  animation: mark-float 5s ease-in-out calc(0.45s + var(--i) * 0.06s + var(--i) * 0.18s) infinite;
+}
+
+@keyframes mark-float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-2px); }
+}
+
+/* Dot: slides in last, then pulses */
+.topbar__mark-dot {
+  display: inline-block;
   color: var(--accent);
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.36s,
+    transform 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.36s;
+}
+.topbar__mark.is-visible .topbar__mark-dot {
+  opacity: 1;
+  transform: translateY(0);
+  animation: dot-pulse 2.8s ease-in-out 0.9s infinite;
+}
+
+@keyframes dot-pulse {
+  0%, 100% { transform: scale(1);   opacity: 1; }
+  50%       { transform: scale(1.5); opacity: 0.5; }
 }
 
 .topbar__tag {

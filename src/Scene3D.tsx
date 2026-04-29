@@ -176,8 +176,8 @@ function Backdrop({ theme }: { theme: Theme }) {
             uv.x *= 1.6;
             float r = length(uv);
 
-            vec3 nInner = vec3(0.085, 0.060, 0.055);
-            vec3 nOuter = vec3(0.030, 0.020, 0.018);
+            vec3 nInner = vec3(0.13, 0.09, 0.08);
+            vec3 nOuter = vec3(0.055, 0.035, 0.030);
             vec3 nGlow  = vec3(0.85, 0.16, 0.12);
             vec3 nRim   = vec3(0.85, 0.45, 0.25);
 
@@ -204,7 +204,7 @@ function Backdrop({ theme }: { theme: Theme }) {
             col += (n - 0.5) * 0.008;
 
             float v = smoothstep(0.45, 1.05, r);
-            col *= 1.0 - v * mix(0.65, 0.22, uMix);
+            col *= 1.0 - v * mix(0.48, 0.22, uMix);
 
             gl_FragColor = vec4(col, 1.0);
           }
@@ -215,33 +215,19 @@ function Backdrop({ theme }: { theme: Theme }) {
 }
 
 function Sculpture({ progressRef, lite, theme }: SculptProps) {
-  const helixGroup = useRef<THREE.Group>(null!)
-  const ring       = useRef<THREE.Mesh>(null!)
-  const ribbonRefs = useRef<Array<THREE.Mesh | null>>([])
-  const spineRefs  = useRef<Array<THREE.Mesh | null>>([])
+  const knotRef = useRef<THREE.Mesh>(null!)
+  const ring    = useRef<THREE.Mesh>(null!)
 
   useFrame((state, delta) => {
     const p = progressRef.current
     const t = state.clock.elapsedTime
 
-    if (helixGroup.current) {
-      helixGroup.current.rotation.y += delta * 0.16
-      helixGroup.current.rotation.x = Math.sin(t * 0.24) * 0.12 + p * Math.PI * 0.9
-      const s = 1 + Math.sin(t * 0.6) * 0.04 - p * 0.12
-      helixGroup.current.scale.setScalar(s)
+    if (knotRef.current) {
+      knotRef.current.rotation.y += delta * 0.14
+      knotRef.current.rotation.x = Math.sin(t * 0.22) * 0.1 + p * Math.PI * 0.5
+      const s = 1 + Math.sin(t * 0.5) * 0.03 - p * 0.08
+      knotRef.current.scale.setScalar(s)
     }
-
-    ribbonRefs.current.forEach((mesh, i) => {
-      if (!mesh) return
-      mesh.rotation.z = Math.sin(t * 0.9 + i * 0.22) * 0.12
-      mesh.rotation.x = Math.cos(t * 0.55 + i * 0.18) * 0.08
-    })
-
-    spineRefs.current.forEach((mesh, i) => {
-      if (!mesh) return
-      mesh.position.y += Math.sin(t * 1.1 + i * 1.7) * 0.0008
-      mesh.rotation.y  += delta * (0.1 + i * 0.04)
-    })
 
     if (ring.current) {
       ring.current.rotation.z += delta * 0.06
@@ -254,72 +240,24 @@ function Sculpture({ progressRef, lite, theme }: SculptProps) {
       <Backdrop theme={theme} />
       <Environment preset={theme === 'day' ? 'apartment' : 'warehouse'} />
 
-      {/* Helicoidal column with diamond refraction material */}
-      <Float speed={1.2} rotationIntensity={0.3} floatIntensity={0.5}>
-        <group ref={helixGroup}>
-          {[0, Math.PI * 0.66, Math.PI * 1.33].map((phase, strandIndex) =>
-            Array.from({ length: lite ? 8 : 10 }, (_, i) => {
-              const count  = lite ? 7 : 9
-              const tSeg   = i / count
-              const angle  = phase + tSeg * Math.PI * 2.18
-              const radius = 0.68 + Math.sin(tSeg * Math.PI) * 0.14
-              const x      = Math.cos(angle) * radius
-              const y      = -1.9 + tSeg * 3.8
-              const z      = Math.sin(angle) * radius * 0.38
-              const rotY   = angle + Math.PI / 2
-              const scaleY = 0.52 + Math.sin(tSeg * Math.PI) * 0.34
-              const refIndex = strandIndex * (lite ? 8 : 10) + i
-
-              return (
-                <mesh
-                  key={`${strandIndex}-${i}`}
-                  ref={(el) => { ribbonRefs.current[refIndex] = el }}
-                  position={[x, y, z]}
-                  rotation={[0, rotY, Math.PI / 9]}
-                  scale={[0.12, scaleY, 0.36]}
-                >
-                  <boxGeometry args={[1, 1, 1]} />
-                  <MeshTransmissionMaterial
-                    backside
-                    thickness={lite ? 0.4 : 0.6}
-                    roughness={0.05}
-                    chromaticAberration={0.04}
-                    anisotropy={0.3}
-                    distortion={0.2}
-                    distortionScale={0.4}
-                    temporalDistortion={0.1}
-                    ior={1.4}
-                    color="#ffffff"
-                    transmissionSampler
-                  />
-                </mesh>
-              )
-            }),
-          )}
-
-          {/* Spine elements — kept with simple transparent material */}
-          {[
-            { pos: [0, 0, 0],     scale: [0.1, 3.6, 0.1] },
-            { pos: [0, 0.18, 0],  scale: [0.04, 2.7, 0.04] },
-            { pos: [0, -0.15, 0], scale: [0.26, 0.22, 0.26] },
-          ].map((spine, i) => (
-            <mesh
-              key={`spine-${i}`}
-              ref={(el) => { spineRefs.current[i] = el }}
-              position={spine.pos as [number, number, number]}
-              scale={spine.scale as [number, number, number]}
-            >
-              <cylinderGeometry args={[1, 1, 1, lite ? 10 : 18]} />
-              {i === 0 ? (
-                <meshBasicMaterial color="#fff8f0" transparent opacity={0.1} />
-              ) : i === 1 ? (
-                <meshBasicMaterial color="#ffffff" transparent opacity={0.08} />
-              ) : (
-                <meshBasicMaterial color="#fff3ea" transparent opacity={0.12} />
-              )}
-            </mesh>
-          ))}
-        </group>
+      {/* Torus knot with glass transmission material */}
+      <Float speed={1.0} rotationIntensity={0.25} floatIntensity={0.4}>
+        <mesh ref={knotRef}>
+          <torusKnotGeometry args={[0.9, 0.28, lite ? 128 : 256, lite ? 16 : 32, 2, 3]} />
+          <MeshTransmissionMaterial
+            backside
+            thickness={lite ? 0.4 : 0.6}
+            roughness={0.05}
+            chromaticAberration={0.04}
+            anisotropy={0.3}
+            distortion={0.2}
+            distortionScale={0.4}
+            temporalDistortion={0.1}
+            ior={1.4}
+            color="#ffffff"
+            transmissionSampler
+          />
+        </mesh>
       </Float>
 
       {/* Outer ring — glass transmission material */}
@@ -381,7 +319,7 @@ const Scene3D = forwardRef<Scene3DHandle, Scene3DProps>(({ theme }, ref) => {
       frameloop="always"
       style={{ background: 'transparent' }}
     >
-      <color attach="background" args={[theme === 'day' ? '#f4ece0' : '#100806']} />
+      <color attach="background" args={[theme === 'day' ? '#f4ece0' : '#1c0e0a']} />
       <ambientLight intensity={theme === 'day' ? 1.2 : 0.7}   color={theme === 'day' ? '#fff7e8' : '#ffe6cc'} />
       <directionalLight position={[4, 5, 4]}  intensity={theme === 'day' ? 1.6 : 1.1} color={theme === 'day' ? '#ffffff' : '#fff0d8'} />
       <directionalLight position={[-3, 1, 2]} intensity={theme === 'day' ? 0.8 : 0.6} color={theme === 'day' ? '#ffe8d4' : '#ffd0b0'} />

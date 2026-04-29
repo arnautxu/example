@@ -169,8 +169,11 @@ export default function App() {
       {/* Top controls live in their own fixed layer above the scroll-proxy
           so they can actually receive clicks. */}
       <header className="topbar">
-        <div className="topbar__mark">
-          Vueik<span>.</span>
+        <div className={`topbar__mark ${!booting ? 'is-visible' : ''}`}>
+          {'Vueik'.split('').map((l, i) => (
+            <span key={i} className="topbar__mark-letter" style={{ '--i': i } as React.CSSProperties}>{l}</span>
+          ))}
+          <span className="topbar__mark-dot">.</span>
         </div>
 
         <a
