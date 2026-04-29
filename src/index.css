@@ -1,25 +1,25 @@
 :root,
 [data-theme='night'] {
-  --bg: oklch(0.16 0.008 60);
-  --bg-2: oklch(0.21 0.012 55);
-  --ink: oklch(0.96 0.012 85);
-  --ink-mute: oklch(0.72 0.018 75);
-  --ink-faint: oklch(0.45 0.014 70);
-  --rule: oklch(0.32 0.012 65);
-  --accent: oklch(0.66 0.22 28);
-  --accent-soft: oklch(0.66 0.22 28 / 0.18);
+  --bg: oklch(0.13 0.006 55);
+  --bg-2: oklch(0.20 0.010 55);
+  --ink: oklch(0.98 0.005 85);          /* closer to true white */
+  --ink-mute: oklch(0.82 0.010 70);     /* AA on dark — was muddy */
+  --ink-faint: oklch(0.62 0.012 65);    /* readable secondary */
+  --rule: oklch(0.38 0.010 60);
+  --accent: oklch(0.70 0.22 28);
+  --accent-soft: oklch(0.70 0.22 28 / 0.18);
   color-scheme: dark;
 }
 
 [data-theme='day'] {
-  --bg: oklch(0.95 0.018 80);
-  --bg-2: oklch(0.91 0.022 75);
-  --ink: oklch(0.20 0.018 50);
-  --ink-mute: oklch(0.42 0.020 55);
-  --ink-faint: oklch(0.62 0.018 65);
-  --rule: oklch(0.78 0.020 70);
-  --accent: oklch(0.55 0.22 28);
-  --accent-soft: oklch(0.55 0.22 28 / 0.16);
+  --bg: oklch(0.97 0.012 80);
+  --bg-2: oklch(0.93 0.016 75);
+  --ink: oklch(0.14 0.020 50);          /* darker → AAA on light */
+  --ink-mute: oklch(0.34 0.024 55);
+  --ink-faint: oklch(0.52 0.020 65);
+  --rule: oklch(0.80 0.018 70);
+  --accent: oklch(0.50 0.22 28);
+  --accent-soft: oklch(0.50 0.22 28 / 0.16);
   /* Keep color-scheme: dark to avoid iOS Safari resetting momentum scroll
      and scrollbar styling on theme change. The visual day palette comes
      from the CSS custom properties above. */
@@ -109,8 +109,9 @@ html::-webkit-scrollbar { display: none; }
 }
 
 /* Readability scrim — keeps text legible over the cinematic backdrop.
-   Two layers: a strong dark band along top + bottom (where most text sits),
-   and a softer center mask. Tunable per-breakpoint. */
+   Three layers: a strong dark band along top + bottom (header/footer),
+   a center mask that darkens the area behind body copy, and a soft
+   vignette at the edges. */
 .stage__scrim {
   position: absolute;
   inset: 0;
@@ -118,31 +119,31 @@ html::-webkit-scrollbar { display: none; }
   pointer-events: none;
   background:
     linear-gradient(to bottom,
-      oklch(0.10 0.015 50 / 0.78) 0%,
-      oklch(0.10 0.015 50 / 0.20) 18%,
-      oklch(0.10 0.015 50 / 0.10) 50%,
-      oklch(0.10 0.015 50 / 0.55) 88%,
-      oklch(0.10 0.015 50 / 0.85) 100%
+      oklch(0.06 0.010 50 / 0.85) 0%,
+      oklch(0.06 0.010 50 / 0.40) 14%,
+      oklch(0.06 0.010 50 / 0.30) 50%,
+      oklch(0.06 0.010 50 / 0.65) 88%,
+      oklch(0.06 0.010 50 / 0.92) 100%
     ),
-    radial-gradient(ellipse 90% 70% at 50% 50%,
-      transparent 0%,
-      oklch(0.10 0.015 50 / 0.25) 65%,
-      oklch(0.10 0.015 50 / 0.55) 100%
+    radial-gradient(ellipse 80% 60% at 50% 50%,
+      oklch(0.06 0.010 50 / 0.35) 0%,
+      oklch(0.06 0.010 50 / 0.20) 50%,
+      oklch(0.06 0.010 50 / 0.45) 100%
     );
 }
 @media (max-width: 820px) {
   .stage__scrim {
     background:
       linear-gradient(to bottom,
-        oklch(0.10 0.015 50 / 0.88) 0%,
-        oklch(0.10 0.015 50 / 0.55) 25%,
-        oklch(0.10 0.015 50 / 0.45) 55%,
-        oklch(0.10 0.015 50 / 0.78) 90%,
-        oklch(0.10 0.015 50 / 0.92) 100%
+        oklch(0.06 0.010 50 / 0.92) 0%,
+        oklch(0.06 0.010 50 / 0.65) 22%,
+        oklch(0.06 0.010 50 / 0.55) 55%,
+        oklch(0.06 0.010 50 / 0.82) 90%,
+        oklch(0.06 0.010 50 / 0.94) 100%
       ),
       radial-gradient(ellipse 95% 80% at 50% 50%,
-        oklch(0.10 0.015 50 / 0.30) 0%,
-        oklch(0.10 0.015 50 / 0.70) 100%
+        oklch(0.06 0.010 50 / 0.45) 0%,
+        oklch(0.06 0.010 50 / 0.72) 100%
       );
   }
 }
@@ -150,16 +151,16 @@ html::-webkit-scrollbar { display: none; }
 [data-theme='day'] .stage__scrim {
   background:
     linear-gradient(to bottom,
-      oklch(0.97 0.014 80 / 0.78) 0%,
-      oklch(0.97 0.014 80 / 0.18) 18%,
-      oklch(0.97 0.014 80 / 0.08) 50%,
-      oklch(0.97 0.014 80 / 0.55) 88%,
-      oklch(0.97 0.014 80 / 0.85) 100%
+      oklch(0.99 0.010 80 / 0.85) 0%,
+      oklch(0.99 0.010 80 / 0.42) 18%,
+      oklch(0.99 0.010 80 / 0.32) 50%,
+      oklch(0.99 0.010 80 / 0.65) 88%,
+      oklch(0.99 0.010 80 / 0.90) 100%
     ),
-    radial-gradient(ellipse 90% 70% at 50% 50%,
-      transparent 0%,
-      oklch(0.97 0.014 80 / 0.22) 65%,
-      oklch(0.97 0.014 80 / 0.50) 100%
+    radial-gradient(ellipse 80% 60% at 50% 50%,
+      oklch(0.99 0.010 80 / 0.38) 0%,
+      oklch(0.99 0.010 80 / 0.18) 50%,
+      oklch(0.99 0.010 80 / 0.42) 100%
     );
 }
 @media (max-width: 820px) {

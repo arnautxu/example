@@ -226,16 +226,16 @@ function Backdrop({ theme }: { theme: Theme }) {
             uv.x *= 1.6;
             float r = length(uv);
 
-            // ---- Night palette ----
-            vec3 nInner = vec3(0.135, 0.095, 0.085);
-            vec3 nOuter = vec3(0.045, 0.030, 0.025);
-            vec3 nGlow  = vec3(0.92, 0.18, 0.14);
-            vec3 nRim   = vec3(0.95, 0.55, 0.30);
+            // ---- Night palette (calmed for text legibility) ----
+            vec3 nInner = vec3(0.085, 0.060, 0.055);
+            vec3 nOuter = vec3(0.030, 0.020, 0.018);
+            vec3 nGlow  = vec3(0.85, 0.16, 0.12);
+            vec3 nRim   = vec3(0.85, 0.45, 0.25);
 
             // ---- Day palette ----
             vec3 dInner = vec3(0.985, 0.965, 0.935);
             vec3 dOuter = vec3(0.910, 0.870, 0.825);
-            vec3 dGlow  = vec3(0.96, 0.55, 0.50);
+            vec3 dGlow  = vec3(0.92, 0.50, 0.45);
             vec3 dRim   = vec3(1.00, 0.85, 0.70);
 
             vec3 inner = mix(nInner, dInner, uMix);
@@ -245,19 +245,20 @@ function Backdrop({ theme }: { theme: Theme }) {
 
             vec3 col = mix(inner, outer, smoothstep(0.0, 0.85, r));
 
-            float glow = exp(-r * 3.2) * mix(0.55, 0.35, uMix);
+            // Tighter, dimmer central glow → less competition with text
+            float glow = exp(-r * 4.5) * mix(0.32, 0.24, uMix);
             col += glowC * glow;
 
             vec2 rimUv = vUv - vec2(0.78, 0.32);
             rimUv.x *= 1.4;
-            float rim = exp(-length(rimUv) * 4.5) * mix(0.22, 0.18, uMix);
+            float rim = exp(-length(rimUv) * 5.5) * mix(0.14, 0.14, uMix);
             col += rimC * rim;
 
             float n = hash(vUv * 1024.0 + floor(uTime * 8.0));
-            col += (n - 0.5) * 0.010;
+            col += (n - 0.5) * 0.008;
 
-            float v = smoothstep(0.55, 1.05, r);
-            col *= 1.0 - v * mix(0.55, 0.18, uMix);
+            float v = smoothstep(0.45, 1.05, r);
+            col *= 1.0 - v * mix(0.65, 0.22, uMix);
 
             gl_FragColor = vec4(col, 1.0);
           }
