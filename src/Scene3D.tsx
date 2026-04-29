@@ -240,12 +240,13 @@ function Sculpture({ progressRef, lite, theme }: SculptProps) {
       <Backdrop theme={theme} />
       <Environment preset={theme === 'day' ? 'apartment' : 'warehouse'} />
 
-      {/* Torus knot with glass transmission material */}
+      {/* Torus knot — MeshTransmissionMaterial, samples reduced for perf */}
       <Float speed={1.0} rotationIntensity={0.25} floatIntensity={0.4}>
         <mesh ref={knotRef}>
-          <torusKnotGeometry args={[0.9, 0.28, lite ? 128 : 256, lite ? 16 : 32, 2, 3]} />
+          <torusKnotGeometry args={[0.9, 0.28, lite ? 80 : 160, lite ? 12 : 20, 2, 3]} />
           <MeshTransmissionMaterial
             backside
+            samples={lite ? 2 : 4}
             thickness={lite ? 0.4 : 0.6}
             roughness={0.05}
             chromaticAberration={0.04}
@@ -254,27 +255,21 @@ function Sculpture({ progressRef, lite, theme }: SculptProps) {
             distortionScale={0.4}
             temporalDistortion={0.1}
             ior={1.4}
-            color="#ffffff"
             transmissionSampler
           />
         </mesh>
       </Float>
 
-      {/* Outer ring — glass transmission material */}
+      {/* Outer ring — meshPhysicalMaterial (no extra render pass) */}
       <mesh ref={ring} rotation={[Math.PI / 2.4, 0, 0]}>
-        <torusGeometry args={[2.2, 0.055, 32, lite ? 120 : 240]} />
-        <MeshTransmissionMaterial
-          backside
-          thickness={0.6}
-          roughness={0.1}
-          chromaticAberration={0.04}
-          anisotropy={0.3}
-          distortion={0.2}
-          distortionScale={0.4}
-          temporalDistortion={0.1}
+        <torusGeometry args={[2.2, 0.055, 32, lite ? 100 : 200]} />
+        <meshPhysicalMaterial
+          transmission={1}
+          roughness={0.05}
+          thickness={0.4}
           ior={1.4}
-          color="#ffffff"
-          transmissionSampler
+          transparent
+          opacity={0.99}
         />
       </mesh>
 
