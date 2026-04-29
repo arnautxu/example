@@ -51,16 +51,19 @@ export default function App() {
     }
   }, [])
 
-  // Lenis smooth scroll: intercepts native wheel/touch events and outputs a
-  // continuously-eased scroll position. ScrollTrigger reads from it so the
-  // 3D timeline progresses fluidly between scroll events instead of stepping.
+  // Discrete one-step-per-gesture navigation: every wheel tick / swipe /
+  // arrow key advances exactly ONE scene, regardless of input strength. A
+  // lock blocks new input until the smooth scrollTo animation finishes, so
+  // a fast trackpad fling can't skip past a scene.
   useEffect(() => {
     if (booting) return
+
+    // Lenis is kept only as the smooth-scroll engine that animates
+    // scrollTo() — its native wheel/touch input handlers are disabled so
+    // we control the cadence ourselves.
     const lenis = new Lenis({
-      lerp: 0.08, // lower = smoother, higher = snappier
-      smoothWheel: true,
-      wheelMultiplier: 0.9,
-      touchMultiplier: 1.2,
+      smoothWheel: false,
+      syncTouch: false,
     })
 
     lenis.on('scroll', ScrollTrigger.update)
@@ -71,9 +74,90 @@ export default function App() {
     gsap.ticker.add(tickerCb)
     gsap.ticker.lagSmoothing(0)
 
+    let animatingUntil = 0
+    let currentTargetIdx = 0
+
+    const goTo = (idx: number) => {
+      const clamped = Math.max(0, Math.min(TOTAL - 1, idx))
+      if (clamped === currentTargetIdx) return
+      if (Date.now() < animatingUntil) return
+      currentTargetIdx = clamped
+
+      const maxScroll =
+        document.documentElement.scrollHeight - window.innerHeight
+      const target = (clamped / (TOTAL - 1)) * maxScroll
+      const duration = 0.95
+
+      animatingUntil = Date.now() + duration * 1000 + 80
+      lenis.scrollTo(target, {
+        duration,
+        easing: (x: number) => 1 - Math.pow(1 - x, 3), // power3.out
+      })
+    }
+
+    const onWheel = (e: WheelEvent) => {
+      // Block native scroll completely; we drive scroll only via goTo.
+      e.preventDefault()
+      if (Math.abs(e.deltaY) < 4) return
+      if (Date.now() < animatingUntil) return
+      goTo(currentTargetIdx + (e.deltaY > 0 ? 1 : -1))
+    }
+
+    let touchStartY: number | null = null
+    const onTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0].clientY
+    }
+    const onTouchMove = (e: TouchEvent) => {
+      if (touchStartY === null) return
+      e.preventDefault()
+      if (Date.now() < animatingUntil) return
+      const dy = touchStartY - e.touches[0].clientY
+      if (Math.abs(dy) > 36) {
+        goTo(currentTargetIdx + (dy > 0 ? 1 : -1))
+        touchStartY = null // require a fresh touch for the next step
+      }
+    }
+    const onTouchEnd = () => {
+      touchStartY = null
+    }
+
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as Element | null
+      if (
+        target &&
+        (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA')
+      )
+        return
+      if (Date.now() < animatingUntil) return
+      if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
+        e.preventDefault()
+        goTo(currentTargetIdx + 1)
+      } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+        e.preventDefault()
+        goTo(currentTargetIdx - 1)
+      } else if (e.key === 'Home') {
+        e.preventDefault()
+        goTo(0)
+      } else if (e.key === 'End') {
+        e.preventDefault()
+        goTo(TOTAL - 1)
+      }
+    }
+
+    window.addEventListener('wheel', onWheel, { passive: false })
+    window.addEventListener('touchstart', onTouchStart, { passive: true })
+    window.addEventListener('touchmove', onTouchMove, { passive: false })
+    window.addEventListener('touchend', onTouchEnd, { passive: true })
+    window.addEventListener('keydown', onKey)
+
     return () => {
       gsap.ticker.remove(tickerCb)
       lenis.destroy()
+      window.removeEventListener('wheel', onWheel)
+      window.removeEventListener('touchstart', onTouchStart)
+      window.removeEventListener('touchmove', onTouchMove)
+      window.removeEventListener('touchend', onTouchEnd)
+      window.removeEventListener('keydown', onKey)
     }
   }, [booting])
 
@@ -121,7 +205,9 @@ export default function App() {
         trigger: '.scroll-proxy__track',
         start: 'top top',
         end: 'bottom bottom',
-        scrub: 0.5,
+        // scrollTo() already eases smoothly; only a tiny scrub for buttery
+        // updates without piling extra lag on top.
+        scrub: 0.2,
         onUpdate: (self) => {
           const p = self.progress
           // 1. Background — continuous, untouched by the discrete text logic
