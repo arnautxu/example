@@ -296,18 +296,20 @@ function Sculpture({ progressRef, lite, theme }: SculptProps) {
                   <meshPhysicalMaterial
                     color="#ffffff"
                     metalness={0}
-                    roughness={lite ? 0.03 : 0.015}
-                    clearcoat={0.35}
-                    clearcoatRoughness={0.02}
-                    reflectivity={0.5}
-                    transmission={lite ? 0.86 : 0.96}
+                    roughness={lite ? 0.02 : 0.008}
+                    clearcoat={0.9}
+                    clearcoatRoughness={0.01}
+                    reflectivity={0.42}
+                    transmission={lite ? 0.9 : 0.98}
                     transparent
-                    opacity={0.985}
-                    thickness={lite ? 1.15 : 1.55}
-                    ior={2.35}
-                    dispersion={lite ? 0.035 : 0.08}
-                    attenuationColor="#ffffff"
-                    attenuationDistance={lite ? 4.5 : 6}
+                    opacity={0.99}
+                    thickness={lite ? 0.85 : 1.1}
+                    ior={1.52}
+                    dispersion={lite ? 0.004 : 0.012}
+                    attenuationColor="#f3f7ff"
+                    attenuationDistance={lite ? 7 : 10}
+                    specularIntensity={1}
+                    specularColor="#ffffff"
                   />
                 </mesh>
               )
