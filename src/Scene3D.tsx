@@ -294,21 +294,21 @@ function Sculpture({ progressRef, lite, theme }: SculptProps) {
                 >
                   <boxGeometry args={[1, 1, 1]} />
                   <meshPhysicalMaterial
-                    color={strandIndex === 1 ? '#ff8d94' : '#ffb1af'}
+                    color="#f5f1ea"
                     metalness={0}
-                    roughness={lite ? 0.08 : 0.05}
+                    roughness={lite ? 0.04 : 0.02}
                     clearcoat={1}
-                    clearcoatRoughness={0.03}
-                    reflectivity={0.95}
-                    transmission={lite ? 0.72 : 0.88}
+                    clearcoatRoughness={0.01}
+                    reflectivity={1}
+                    transmission={lite ? 0.82 : 0.94}
                     transparent
-                    opacity={0.96}
-                    thickness={lite ? 0.95 : 1.25}
-                    ior={1.46}
-                    attenuationColor={strandIndex === 1 ? '#ff4058' : '#ea0029'}
-                    attenuationDistance={lite ? 1.25 : 1.85}
-                    emissive="#220005"
-                    emissiveIntensity={0.12}
+                    opacity={0.98}
+                    thickness={lite ? 1.05 : 1.4}
+                    ior={2.1}
+                    attenuationColor="#ffffff"
+                    attenuationDistance={lite ? 2.8 : 3.8}
+                    emissive="#ffffff"
+                    emissiveIntensity={0.02}
                   />
                 </mesh>
               )
@@ -328,11 +328,11 @@ function Sculpture({ progressRef, lite, theme }: SculptProps) {
             >
               <cylinderGeometry args={[1, 1, 1, lite ? 10 : 18]} />
               {i === 0 ? (
-                <meshBasicMaterial color="#ff8b7f" transparent opacity={0.12} />
+                <meshBasicMaterial color="#fff8f0" transparent opacity={0.1} />
               ) : i === 1 ? (
-                <meshBasicMaterial color="#ffe6d8" transparent opacity={0.14} />
+                <meshBasicMaterial color="#ffffff" transparent opacity={0.08} />
               ) : (
-                <meshBasicMaterial color="#ff6d63" transparent opacity={0.22} />
+                <meshBasicMaterial color="#fff3ea" transparent opacity={0.12} />
               )}
             </mesh>
           ))}
