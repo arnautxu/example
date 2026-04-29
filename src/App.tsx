@@ -190,7 +190,8 @@ export default function App() {
           aria-label="PalSec Agency"
           style={{ pointerEvents: 'auto' }}
         >
-          <PalSecLogo height={14} />
+          <span className="topbar__tag-label">{t.topbarTagline}</span>
+          <PalSecLogo height={16} />
         </a>
 
         <div className="topbar__controls">

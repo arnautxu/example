@@ -279,22 +279,18 @@ function Sculpture({ progressRef, lite, theme }: SculptProps) {
                   scale={[0.12, scaleY, 0.36]}
                 >
                   <boxGeometry args={[1, 1, 1]} />
-                  <meshPhysicalMaterial
+                  <MeshTransmissionMaterial
+                    backside
+                    thickness={lite ? 0.4 : 0.6}
+                    roughness={0.05}
+                    chromaticAberration={0.04}
+                    anisotropy={0.3}
+                    distortion={0.2}
+                    distortionScale={0.4}
+                    temporalDistortion={0.1}
+                    ior={1.4}
                     color="#ffffff"
-                    metalness={0}
-                    roughness={lite ? 0.02 : 0.0}
-                    clearcoat={1}
-                    clearcoatRoughness={0.01}
-                    transmission={1}
-                    transparent
-                    opacity={0.99}
-                    thickness={lite ? 0.85 : 1.2}
-                    ior={2.4}
-                    dispersion={lite ? 0.006 : 0.02}
-                    attenuationColor="#f3f7ff"
-                    attenuationDistance={lite ? 7 : 12}
-                    specularIntensity={1}
-                    specularColor="#ffffff"
+                    transmissionSampler
                   />
                 </mesh>
               )
