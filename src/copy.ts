@@ -30,7 +30,7 @@ export type Copy = {
 
 export const COPY: Record<Lang, Copy> = {
   ca: {
-    bootLabel: 'Vanta · Carregant',
+    bootLabel: 'Vueik · Carregant',
     topbarTagline: 'Un projecte de PalSec Agency',
     toggles: { lang: { ca: 'CA', en: 'EN' }, theme: { day: 'Dia', night: 'Nit' } },
     sceneLabels: ['Inici', 'Manifest', 'Projectes', 'Mètode', 'Servei', 'Contacte'],
@@ -43,8 +43,8 @@ export const COPY: Record<Lang, Copy> = {
         l2: 'per a marques que rebutgen',
         l3: 'el disseny per defecte.',
       },
-      sub: 'Vanta és un projecte de PalSec Agency dedicat al disseny i desenvolupament web a mida. Dissenyem i programem webs des de zero per a marques i empreses que volen ser percebudes amb la mateixa cura amb què treballen. Cap plantilla. Cap WordPress. Cap producte enllaunat. Cada projecte: codi propi, disseny únic, llançament en 6 a 8 setmanes.',
-      smallTag: 'Vanta · PalSec Agency',
+      sub: 'Vueik és un projecte de PalSec Agency dedicat al disseny i desenvolupament web a mida. Dissenyem i programem webs des de zero per a marques i empreses que volen ser percebudes amb la mateixa cura amb què treballen. Cap plantilla. Cap WordPress. Cap producte enllaunat. Cada projecte: codi propi, disseny únic, llançament en 6 a 8 setmanes.',
+      smallTag: 'Vueik · PalSec Agency',
     },
     manifesto: {
       label: 'Manifest',
@@ -66,7 +66,7 @@ export const COPY: Record<Lang, Copy> = {
     quote: {
       open: 'Quan publiquem una web, hi has de reconèixer la teva veu, no la nostra.',
       close: "És l'única regla que no negociem.",
-      cite: 'Mètode Vanta',
+      cite: 'Mètode Vueik',
     },
     services: {
       h: 'Servei',
@@ -100,13 +100,13 @@ export const COPY: Record<Lang, Copy> = {
         l2post: ' 30 minuts. Sense compromís.',
       },
       cols: { email: 'Correu', agency: 'Agència', dept: 'Departament', hq: 'Seu' },
-      deptValue: 'Vanta · PalSec Agency',
+      deptValue: 'Vueik · PalSec Agency',
       hqValue: 'Catalunya',
     },
   },
 
   en: {
-    bootLabel: 'Vanta · Loading',
+    bootLabel: 'Vueik · Loading',
     topbarTagline: 'A PalSec Agency project',
     toggles: { lang: { ca: 'CA', en: 'EN' }, theme: { day: 'Day', night: 'Night' } },
     sceneLabels: ['Index', 'Manifesto', 'Work', 'Method', 'Practice', 'Contact'],
@@ -119,8 +119,8 @@ export const COPY: Record<Lang, Copy> = {
         l2: 'for brands that reject',
         l3: 'the default.',
       },
-      sub: "Vanta is a PalSec Agency project focused on bespoke web design and development. We design and code websites from scratch for brands and companies who want to be seen with the same care they put into their work. No templates. No WordPress. No off-the-shelf products. Every project: our own code, unique design, shipped in 6 to 8 weeks.",
-      smallTag: 'Vanta · PalSec Agency',
+      sub: "Vueik is a PalSec Agency project focused on bespoke web design and development. We design and code websites from scratch for brands and companies who want to be seen with the same care they put into their work. No templates. No WordPress. No off-the-shelf products. Every project: our own code, unique design, shipped in 6 to 8 weeks.",
+      smallTag: 'Vueik · PalSec Agency',
     },
     manifesto: {
       label: 'Manifesto',
@@ -142,7 +142,7 @@ export const COPY: Record<Lang, Copy> = {
     quote: {
       open: 'When we ship a website, you should hear your voice in it, not ours.',
       close: "That's the one rule we don't negotiate.",
-      cite: 'Vanta Method',
+      cite: 'Vueik Method',
     },
     services: {
       h: 'Practice',
@@ -176,7 +176,7 @@ export const COPY: Record<Lang, Copy> = {
         l2post: ' 30 minutes. No obligation.',
       },
       cols: { email: 'Email', agency: 'Agency', dept: 'Department', hq: 'HQ' },
-      deptValue: 'Vanta · PalSec Agency',
+      deptValue: 'Vueik · PalSec Agency',
       hqValue: 'Catalonia',
     },
   },
