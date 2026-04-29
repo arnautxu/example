@@ -13,10 +13,10 @@ type RigProps = { progressRef: React.MutableRefObject<number> }
 type SculptProps = RigProps & { lite: boolean; theme: Theme }
 
 const WAYPOINTS: Array<{ pos: [number, number, number]; look: [number, number, number] }> = [
-  { pos: [0, 0, 6.5],    look: [0, 0, 0] },
+  { pos: [0, 0, 6.5],      look: [0, 0, 0] },
   { pos: [3.6, 1.2, 4.8],  look: [0.6, 0.4, 0] },
   { pos: [-2.4, -1.8, 5.2], look: [0, 0, 0] },
-  { pos: [0, 2.4, 3.4],   look: [0, 0, 0] },
+  { pos: [0, 2.4, 3.4],    look: [0, 0, 0] },
   { pos: [-3.2, 0.8, 5.0], look: [-0.4, 0, 0] },
   { pos: [0.8, -0.6, 7.6], look: [0, 0, 0] },
 ]
@@ -57,7 +57,6 @@ function Rig({ progressRef }: RigProps) {
   return null
 }
 
-// Soft bokeh sprite
 function makeBokehTexture() {
   const size = 128
   const c = document.createElement('canvas')
@@ -92,9 +91,9 @@ function BokehField({ progressRef, lite }: SculptProps) {
         ? new THREE.Color('#ea4a3a').lerp(new THREE.Color('#ff7a55'), Math.random())
         : new THREE.Color('#ffd9b8').lerp(new THREE.Color('#ffc290'), Math.random())
       return {
-        x:       Math.cos(angle) * r,
-        y:       (Math.random() - 0.5) * 3.2,
-        z:       Math.sin(angle) * r + depth,
+        x: Math.cos(angle) * r,
+        y: (Math.random() - 0.5) * 3.2,
+        z: Math.sin(angle) * r + depth,
         scale, color,
         opacity: isFar ? 0.18 + Math.random() * 0.18 : 0.35 + Math.random() * 0.28,
         speed:   0.05 + Math.random() * 0.18,
@@ -137,7 +136,6 @@ function BokehField({ progressRef, lite }: SculptProps) {
   )
 }
 
-// Gradient backdrop shader
 function Backdrop({ theme }: { theme: Theme }) {
   const matRef = useRef<THREE.ShaderMaterial>(null!)
   const targetMix = theme === 'day' ? 1 : 0
@@ -216,41 +214,39 @@ function Backdrop({ theme }: { theme: Theme }) {
   )
 }
 
-// Gem configs — main central gem + orbiting satellites
-type GeomType = 'ico' | 'oct'
-const GEM_CONFIGS: {
-  pos: [number, number, number]
-  scale: number
-  geom: GeomType
-  speed: number
-  floatIntensity: number
-  rotIntensity: number
-}[] = [
-  { pos: [0, 0, 0],          scale: 0.88, geom: 'ico', speed: 0.8, floatIntensity: 0.25, rotIntensity: 0.15 },
-  { pos: [1.8, 0.5, -0.5],   scale: 0.40, geom: 'oct', speed: 1.3, floatIntensity: 0.50, rotIntensity: 0.40 },
-  { pos: [-1.6, -0.7, 0.3],  scale: 0.44, geom: 'ico', speed: 1.0, floatIntensity: 0.45, rotIntensity: 0.35 },
-  { pos: [0.6, 1.5, -0.7],   scale: 0.28, geom: 'oct', speed: 1.5, floatIntensity: 0.60, rotIntensity: 0.50 },
-  { pos: [-0.9, -1.4, 0.6],  scale: 0.22, geom: 'oct', speed: 1.2, floatIntensity: 0.55, rotIntensity: 0.45 },
-  { pos: [2.1, -0.9, 0.1],   scale: 0.18, geom: 'ico', speed: 1.6, floatIntensity: 0.50, rotIntensity: 0.30 },
-]
+function Sculpture({ progressRef, lite, theme }: SculptProps) {
+  const helixGroup = useRef<THREE.Group>(null!)
+  const ring       = useRef<THREE.Mesh>(null!)
+  const ribbonRefs = useRef<Array<THREE.Mesh | null>>([])
+  const spineRefs  = useRef<Array<THREE.Mesh | null>>([])
 
-function DiamondSculpture({ progressRef, lite, theme }: SculptProps) {
-  const groupRef = useRef<THREE.Group>(null!)
-  const ring     = useRef<THREE.Mesh>(null!)
-
-  // Load environment for both scene lighting and refraction envMap
+  // Environment texture shared with MeshRefractionMaterial
   const envPreset = theme === 'day' ? 'apartment' : 'warehouse'
   const env = useEnvironment({ preset: envPreset } as { preset: typeof envPreset })
-
-  const configs = lite ? GEM_CONFIGS.slice(0, 3) : GEM_CONFIGS
 
   useFrame((state, delta) => {
     const p = progressRef.current
     const t = state.clock.elapsedTime
-    if (groupRef.current) {
-      groupRef.current.rotation.y = t * 0.05 + p * Math.PI * 0.22
-      groupRef.current.rotation.x = Math.sin(t * 0.07) * 0.055 - p * 0.04
+
+    if (helixGroup.current) {
+      helixGroup.current.rotation.y += delta * 0.16
+      helixGroup.current.rotation.x = Math.sin(t * 0.24) * 0.12 + p * Math.PI * 0.9
+      const s = 1 + Math.sin(t * 0.6) * 0.04 - p * 0.12
+      helixGroup.current.scale.setScalar(s)
     }
+
+    ribbonRefs.current.forEach((mesh, i) => {
+      if (!mesh) return
+      mesh.rotation.z = Math.sin(t * 0.9 + i * 0.22) * 0.12
+      mesh.rotation.x = Math.cos(t * 0.55 + i * 0.18) * 0.08
+    })
+
+    spineRefs.current.forEach((mesh, i) => {
+      if (!mesh) return
+      mesh.position.y += Math.sin(t * 1.1 + i * 1.7) * 0.0008
+      mesh.rotation.y  += delta * (0.1 + i * 0.04)
+    })
+
     if (ring.current) {
       ring.current.rotation.z += delta * 0.06
       ring.current.rotation.x = -0.4 + p * 0.6
@@ -262,37 +258,71 @@ function DiamondSculpture({ progressRef, lite, theme }: SculptProps) {
   return (
     <group>
       <Backdrop theme={theme} />
-
-      {/* Scene environment — same texture used for MeshRefractionMaterial envMap */}
       <Environment map={env} />
 
-      {/* Floating diamond gems */}
-      <group ref={groupRef}>
-        {configs.map((cfg, i) => (
-          <Float
-            key={i}
-            speed={cfg.speed}
-            floatIntensity={cfg.floatIntensity}
-            rotationIntensity={cfg.rotIntensity}
-          >
-            <mesh position={cfg.pos} scale={cfg.scale}>
-              {cfg.geom === 'ico'
-                ? <icosahedronGeometry args={[1, lite ? 0 : 1]} />
-                : <octahedronGeometry  args={[1, 0]} />
-              }
-              <MeshRefractionMaterial
-                envMap={env}
-                bounces={bounces}
-                aberrationStrength={0.02}
-                ior={2.4}
-                fresnel={1}
-                color="white"
-                toneMapped={false}
-              />
+      {/* Helicoidal column with diamond refraction material */}
+      <Float speed={1.2} rotationIntensity={0.3} floatIntensity={0.5}>
+        <group ref={helixGroup}>
+          {[0, Math.PI * 0.66, Math.PI * 1.33].map((phase, strandIndex) =>
+            Array.from({ length: lite ? 8 : 10 }, (_, i) => {
+              const count  = lite ? 7 : 9
+              const tSeg   = i / count
+              const angle  = phase + tSeg * Math.PI * 2.18
+              const radius = 0.68 + Math.sin(tSeg * Math.PI) * 0.14
+              const x      = Math.cos(angle) * radius
+              const y      = -1.9 + tSeg * 3.8
+              const z      = Math.sin(angle) * radius * 0.38
+              const rotY   = angle + Math.PI / 2
+              const scaleY = 0.52 + Math.sin(tSeg * Math.PI) * 0.34
+              const refIndex = strandIndex * (lite ? 8 : 10) + i
+
+              return (
+                <mesh
+                  key={`${strandIndex}-${i}`}
+                  ref={(el) => { ribbonRefs.current[refIndex] = el }}
+                  position={[x, y, z]}
+                  rotation={[0, rotY, Math.PI / 9]}
+                  scale={[0.12, scaleY, 0.36]}
+                >
+                  <boxGeometry args={[1, 1, 1]} />
+                  <MeshRefractionMaterial
+                    envMap={env}
+                    bounces={bounces}
+                    aberrationStrength={0.015}
+                    ior={2.4}
+                    fresnel={1}
+                    color="white"
+                    toneMapped={false}
+                  />
+                </mesh>
+              )
+            }),
+          )}
+
+          {/* Spine elements — kept with simple transparent material */}
+          {[
+            { pos: [0, 0, 0],     scale: [0.1, 3.6, 0.1] },
+            { pos: [0, 0.18, 0],  scale: [0.04, 2.7, 0.04] },
+            { pos: [0, -0.15, 0], scale: [0.26, 0.22, 0.26] },
+          ].map((spine, i) => (
+            <mesh
+              key={`spine-${i}`}
+              ref={(el) => { spineRefs.current[i] = el }}
+              position={spine.pos as [number, number, number]}
+              scale={spine.scale as [number, number, number]}
+            >
+              <cylinderGeometry args={[1, 1, 1, lite ? 10 : 18]} />
+              {i === 0 ? (
+                <meshBasicMaterial color="#fff8f0" transparent opacity={0.1} />
+              ) : i === 1 ? (
+                <meshBasicMaterial color="#ffffff" transparent opacity={0.08} />
+              ) : (
+                <meshBasicMaterial color="#fff3ea" transparent opacity={0.12} />
+              )}
             </mesh>
-          </Float>
-        ))}
-      </group>
+          ))}
+        </group>
+      </Float>
 
       {/* Outer thin ring — red accent */}
       <mesh ref={ring} rotation={[Math.PI / 2.4, 0, 0]}>
@@ -342,16 +372,13 @@ const Scene3D = forwardRef<Scene3DHandle, Scene3DProps>(({ theme }, ref) => {
       style={{ background: 'transparent' }}
     >
       <color attach="background" args={[theme === 'day' ? '#f4ece0' : '#100806']} />
-      <ambientLight
-        intensity={theme === 'day' ? 1.2 : 0.7}
-        color={theme === 'day' ? '#fff7e8' : '#ffe6cc'}
-      />
+      <ambientLight intensity={theme === 'day' ? 1.2 : 0.7}   color={theme === 'day' ? '#fff7e8' : '#ffe6cc'} />
       <directionalLight position={[4, 5, 4]}  intensity={theme === 'day' ? 1.6 : 1.1} color={theme === 'day' ? '#ffffff' : '#fff0d8'} />
       <directionalLight position={[-3, 1, 2]} intensity={theme === 'day' ? 0.8 : 0.6} color={theme === 'day' ? '#ffe8d4' : '#ffd0b0'} />
       <pointLight        position={[0, 0, 5]}  intensity={theme === 'day' ? 0.7 : 0.5} color={theme === 'day' ? '#ffeed6' : '#ffd9b8'} />
 
       <Suspense fallback={null}>
-        <DiamondSculpture progressRef={progressRef} lite={lite} theme={theme} />
+        <Sculpture progressRef={progressRef} lite={lite} theme={theme} />
       </Suspense>
       <Rig progressRef={progressRef} />
     </Canvas>
