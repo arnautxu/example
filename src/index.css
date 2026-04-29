@@ -372,6 +372,11 @@ html::-webkit-scrollbar { display: none; }
   opacity: 0;
   will-change: opacity, transform;
   overflow: hidden;
+  pointer-events: none;
+}
+
+.scene.is-active {
+  pointer-events: auto;
 }
 
 .scene__inner {

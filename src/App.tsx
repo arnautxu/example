@@ -69,8 +69,9 @@ export default function App() {
   useEffect(() => {
     if (booting) return
     const ctx = gsap.context(() => {
-      gsap.set(sceneRefs.current, { opacity: 0, y: 24, pointerEvents: 'none' })
-      gsap.set(sceneRefs.current[0], { opacity: 1, y: 0, pointerEvents: 'auto' })
+      gsap.set(sceneRefs.current, { opacity: 0, y: 24 })
+      gsap.set(sceneRefs.current[0], { opacity: 1, y: 0 })
+      sceneRefs.current[0]?.classList.add('is-active')
 
       const tl = gsap.timeline({
         scrollTrigger: {
@@ -85,6 +86,9 @@ export default function App() {
               progressBarRef.current.style.width = `${p * 100}%`
             }
             const idx = Math.min(Math.floor(p * TOTAL), TOTAL - 1)
+            sceneRefs.current.forEach((ref, i) => {
+              ref?.classList.toggle('is-active', i === idx)
+            })
             if (counterNumRef.current) {
               counterNumRef.current.textContent = String(idx + 1).padStart(2, '0')
             }
@@ -100,12 +104,12 @@ export default function App() {
         const b = sceneRefs.current[i + 1]
         tl.to(
           a,
-          { opacity: 0, y: -32, duration: 0.5, ease: 'power2.in', pointerEvents: 'none' },
+          { opacity: 0, y: -32, duration: 0.5, ease: 'power2.in' },
           i + 0.45,
         ).fromTo(
           b,
-          { opacity: 0, y: 32, pointerEvents: 'none' },
-          { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out', pointerEvents: 'auto' },
+          { opacity: 0, y: 32 },
+          { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' },
           i + 0.55,
         )
       }
