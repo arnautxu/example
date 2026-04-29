@@ -69,8 +69,8 @@ export default function App() {
   useEffect(() => {
     if (booting) return
     const ctx = gsap.context(() => {
-      gsap.set(sceneRefs.current, { opacity: 0, y: 24 })
-      gsap.set(sceneRefs.current[0], { opacity: 1, y: 0 })
+      gsap.set(sceneRefs.current, { opacity: 0, y: 24, pointerEvents: 'none' })
+      gsap.set(sceneRefs.current[0], { opacity: 1, y: 0, pointerEvents: 'auto' })
 
       const tl = gsap.timeline({
         scrollTrigger: {
@@ -100,12 +100,12 @@ export default function App() {
         const b = sceneRefs.current[i + 1]
         tl.to(
           a,
-          { opacity: 0, y: -32, duration: 0.5, ease: 'power2.in' },
+          { opacity: 0, y: -32, duration: 0.5, ease: 'power2.in', pointerEvents: 'none' },
           i + 0.45,
         ).fromTo(
           b,
-          { opacity: 0, y: 32 },
-          { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' },
+          { opacity: 0, y: 32, pointerEvents: 'none' },
+          { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out', pointerEvents: 'auto' },
           i + 0.55,
         )
       }
