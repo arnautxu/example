@@ -138,7 +138,7 @@ export default function App() {
           so they can actually receive clicks. */}
       <header className="topbar">
         <div className="topbar__mark">
-          PalSec WebLab<span>.</span>
+          Cerberus WebLab<span>.</span>
         </div>
 
         <div className="topbar__tag">{t.topbarTagline}</div>
@@ -299,22 +299,22 @@ export default function App() {
                 <div className="s-contact__grid">
                   <div className="s-contact__col">
                     <span>{t.contact.cols.email}</span>
-                    <a href="mailto:info@palsec.agency">info@palsec.agency</a>
+                    <a href="mailto:hello@cerberus.studio">hello@cerberus.studio</a>
                   </div>
                   <div className="s-contact__col">
                     <span>{t.contact.cols.agency}</span>
                     <a
-                      href="https://www.palsec.agency"
+                      href="https://www.cerberus.studio"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      www.palsec.agency
+                      www.cerberus.studio
                     </a>
                   </div>
                   <div className="s-contact__col">
                     <span>{t.contact.cols.dept}</span>
                     <a
-                      href="https://www.palsec.agency"
+                      href="https://www.cerberus.studio"
                       target="_blank"
                       rel="noopener noreferrer"
                     >

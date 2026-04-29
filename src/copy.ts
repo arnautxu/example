@@ -30,21 +30,21 @@ export type Copy = {
 
 export const COPY: Record<Lang, Copy> = {
   ca: {
-    bootLabel: 'PalSec WebLab · Carregant',
-    topbarTagline: 'Un departament de PalSec Agency',
+    bootLabel: 'Cerberus WebLab · Carregant',
+    topbarTagline: 'Un departament de Cerberus Studio',
     toggles: { lang: { ca: 'CA', en: 'EN' }, theme: { day: 'Dia', night: 'Nit' } },
     sceneLabels: ['Inici', 'Manifest', 'Projectes', 'Mètode', 'Servei', 'Contacte'],
     scrollHint: 'Desplaça per avançar',
 
     title: {
-      eyebrow: 'Un projecte de PalSec Agcy.',
+      eyebrow: 'Un projecte de Cerberus Studio.',
       h: {
         l1: 'Webs a mida',
         l2: 'per a marques que rebutgen',
         l3: 'el disseny per defecte.',
       },
-      sub: 'Som el WebLab de PalSec Agency. Dissenyem i programem webs des de zero per a marques i empreses que volen ser percebudes amb la mateixa cura amb què treballen. Cap plantilla. Cap WordPress. Cap producte enllaunat. Cada projecte: codi propi, disseny únic, llançament en 6 a 8 setmanes.',
-      smallTag: 'PalSec Agency · WebLab',
+      sub: 'Som Cerberus WebLab. Dissenyem i programem webs des de zero per a marques i empreses que volen ser percebudes amb la mateixa cura amb què treballen. Cap plantilla. Cap WordPress. Cap producte enllaunat. Cada projecte: codi propi, disseny únic, llançament en 6 a 8 setmanes.',
+      smallTag: 'Cerberus Studio · WebLab',
     },
     manifesto: {
       label: 'Manifest',
@@ -58,7 +58,7 @@ export const COPY: Record<Lang, Copy> = {
       items: [
         { name: 'Neutral Design', tag: 'Estudi · Web', yr: '2025', url: 'https://neutraldesign.es' },
         { name: 'Estudi Dental Carrera', tag: 'Marca · Web', yr: '2025', url: 'https://estudi-dental-carrera.vercel.app' },
-        { name: 'PalSec Agency', tag: 'Marca · Web', yr: '2025', url: 'https://www.palsec.agency' },
+        { name: 'Cerberus Studio', tag: 'Marca · Web', yr: '2025', url: 'https://www.cerberus.studio' },
         { name: 'Global Fisio', tag: 'Marca · Web', yr: '2024', url: 'https://global-fisio.vercel.app' },
         { name: 'iPediatria', tag: 'Marca · Web', yr: '2024', url: 'https://i-pediatria.vercel.app' },
       ],
@@ -66,7 +66,7 @@ export const COPY: Record<Lang, Copy> = {
     quote: {
       open: 'Quan publiquem una web, hi has de reconèixer la teva veu, no la nostra.',
       close: "És l'única regla que no negociem.",
-      cite: 'Mètode PalSec WebLab',
+      cite: 'Mètode Cerberus WebLab',
     },
     services: {
       h: 'Servei',
@@ -100,27 +100,27 @@ export const COPY: Record<Lang, Copy> = {
         l2post: ' 30 minuts. Sense compromís.',
       },
       cols: { email: 'Correu', agency: 'Agència', dept: 'Departament', hq: 'Seu' },
-      deptValue: 'WebLab · PalSec Agency',
+      deptValue: 'WebLab · Cerberus Studio',
       hqValue: 'Catalunya',
     },
   },
 
   en: {
-    bootLabel: 'PalSec WebLab · Loading',
-    topbarTagline: 'A PalSec Agency department',
+    bootLabel: 'Cerberus WebLab · Loading',
+    topbarTagline: 'A Cerberus Studio department',
     toggles: { lang: { ca: 'CA', en: 'EN' }, theme: { day: 'Day', night: 'Night' } },
     sceneLabels: ['Index', 'Manifesto', 'Work', 'Method', 'Practice', 'Contact'],
     scrollHint: 'Scroll to advance',
 
     title: {
-      eyebrow: 'A PalSec Agcy. project',
+      eyebrow: 'A Cerberus Studio project',
       h: {
         l1: 'Bespoke websites',
         l2: 'for brands that reject',
         l3: 'the default.',
       },
-      sub: "We're the WebLab of PalSec Agency. We design and code websites from scratch for brands and companies who want to be seen with the same care they put into their work. No templates. No WordPress. No off-the-shelf products. Every project: our own code, unique design, shipped in 6 to 8 weeks.",
-      smallTag: 'PalSec Agency · WebLab',
+      sub: "We're Cerberus WebLab. We design and code websites from scratch for brands and companies who want to be seen with the same care they put into their work. No templates. No WordPress. No off-the-shelf products. Every project: our own code, unique design, shipped in 6 to 8 weeks.",
+      smallTag: 'Cerberus Studio · WebLab',
     },
     manifesto: {
       label: 'Manifesto',
@@ -134,7 +134,7 @@ export const COPY: Record<Lang, Copy> = {
       items: [
         { name: 'Neutral Design', tag: 'Studio · Web', yr: '2025', url: 'https://neutraldesign.es' },
         { name: 'Estudi Dental Carrera', tag: 'Brand · Web', yr: '2025', url: 'https://estudi-dental-carrera.vercel.app' },
-        { name: 'PalSec Agency', tag: 'Brand · Web', yr: '2025', url: 'https://www.palsec.agency' },
+        { name: 'Cerberus Studio', tag: 'Brand · Web', yr: '2025', url: 'https://www.cerberus.studio' },
         { name: 'Global Fisio', tag: 'Brand · Web', yr: '2024', url: 'https://global-fisio.vercel.app' },
         { name: 'iPediatria', tag: 'Brand · Web', yr: '2024', url: 'https://i-pediatria.vercel.app' },
       ],
@@ -142,7 +142,7 @@ export const COPY: Record<Lang, Copy> = {
     quote: {
       open: 'When we ship a website, you should hear your voice in it, not ours.',
       close: "That's the one rule we don't negotiate.",
-      cite: 'PalSec WebLab Method',
+      cite: 'Cerberus WebLab Method',
     },
     services: {
       h: 'Practice',
@@ -176,7 +176,7 @@ export const COPY: Record<Lang, Copy> = {
         l2post: ' 30 minutes. No obligation.',
       },
       cols: { email: 'Email', agency: 'Agency', dept: 'Department', hq: 'HQ' },
-      deptValue: 'WebLab · PalSec Agency',
+      deptValue: 'WebLab · Cerberus Studio',
       hqValue: 'Catalonia',
     },
   },

@@ -1,7 +1,6 @@
 import { useRef, useMemo, forwardRef, useImperativeHandle, useEffect, useState, Suspense } from 'react'
-import { Canvas, useFrame, useLoader } from '@react-three/fiber'
+import { Canvas, useFrame } from '@react-three/fiber'
 import { Environment, MeshTransmissionMaterial, Float } from '@react-three/drei'
-import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js'
 import * as THREE from 'three'
 
 export type Scene3DHandle = {
@@ -58,44 +57,6 @@ function Rig({ progressRef }: RigProps) {
   })
 
   return null
-}
-
-function useLogoGeometry(lite: boolean): THREE.BufferGeometry {
-  const data = useLoader(SVGLoader, '/palsec-logo.svg')
-
-  return useMemo(() => {
-    const shapes: THREE.Shape[] = []
-    for (const path of data.paths) {
-      const ss = SVGLoader.createShapes(path)
-      for (const s of ss) shapes.push(s)
-    }
-
-    const depth = lite ? 22 : 28
-    const geom = new THREE.ExtrudeGeometry(shapes, {
-      depth,
-      bevelEnabled: true,
-      bevelSegments: lite ? 2 : 4,
-      bevelSize: 1.4,
-      bevelThickness: 1.4,
-      curveSegments: lite ? 8 : 14,
-    })
-
-    geom.rotateX(Math.PI)
-    geom.computeBoundingBox()
-    const bb = geom.boundingBox!
-    const cx = (bb.min.x + bb.max.x) / 2
-    const cy = (bb.min.y + bb.max.y) / 2
-    const cz = (bb.min.z + bb.max.z) / 2
-    geom.translate(-cx, -cy, -cz)
-
-    const sizeX = bb.max.x - bb.min.x
-    const target = 3.4
-    const k = target / sizeX
-    geom.scale(k, k, k)
-
-    geom.computeVertexNormals()
-    return geom
-  }, [data, lite])
 }
 
 // Soft bokeh sprite — very soft falloff, no hot core. Used for the
@@ -269,21 +230,39 @@ function Backdrop({ theme }: { theme: Theme }) {
 }
 
 function Sculpture({ progressRef, lite, theme }: SculptProps) {
-  const logoGroup = useRef<THREE.Group>(null!)
+  const coreGroup = useRef<THREE.Group>(null!)
   const ring = useRef<THREE.Mesh>(null!)
-
-  const logoGeom = useLogoGeometry(lite)
+  const shardBelt = useRef<THREE.Group>(null!)
+  const shardRefs = useRef<Array<THREE.Mesh | null>>([])
+  const spikeRefs = useRef<Array<THREE.Mesh | null>>([])
 
   useFrame((state, delta) => {
     const p = progressRef.current
     const t = state.clock.elapsedTime
 
-    if (logoGroup.current) {
-      logoGroup.current.rotation.y += delta * 0.18
-      logoGroup.current.rotation.x = Math.sin(t * 0.3) * 0.18 + p * Math.PI * 1.1
+    if (coreGroup.current) {
+      coreGroup.current.rotation.y += delta * 0.22
+      coreGroup.current.rotation.x = Math.sin(t * 0.3) * 0.18 + p * Math.PI * 1.1
       const s = 1 + Math.sin(t * 0.6) * 0.04 - p * 0.12
-      logoGroup.current.scale.setScalar(s)
+      coreGroup.current.scale.setScalar(s)
     }
+
+    if (shardBelt.current) {
+      shardBelt.current.rotation.y = -t * 0.28
+      shardBelt.current.rotation.z = Math.sin(t * 0.22) * 0.18
+    }
+
+    shardRefs.current.forEach((mesh, i) => {
+      if (!mesh) return
+      mesh.rotation.x += delta * (0.2 + i * 0.06)
+      mesh.rotation.y -= delta * (0.28 + i * 0.04)
+    })
+
+    spikeRefs.current.forEach((mesh, i) => {
+      if (!mesh) return
+      mesh.rotation.z += delta * (0.35 + i * 0.05)
+      mesh.position.y += Math.sin(t * 0.9 + i * 1.4) * 0.0009
+    })
 
     if (ring.current) {
       ring.current.rotation.z += delta * 0.06
@@ -295,46 +274,118 @@ function Sculpture({ progressRef, lite, theme }: SculptProps) {
     <group>
       <Backdrop theme={theme} />
 
-      {/* PalSec logo — red glass */}
+      {/* Main translucent geometric core */}
       <Float speed={1.2} rotationIntensity={0.3} floatIntensity={0.5}>
-        <group ref={logoGroup}>
-          <mesh geometry={logoGeom} castShadow>
+        <group ref={coreGroup}>
+          <mesh castShadow rotation={[Math.PI / 5, Math.PI / 4, 0]}>
+            <octahedronGeometry args={[1.5, 0]} />
             {lite ? (
               <meshPhysicalMaterial
-                color="#ea0029"
+                color="#d91732"
                 metalness={0}
                 roughness={0.18}
                 clearcoat={1}
                 clearcoatRoughness={0.12}
-                transmission={0.6}
-                thickness={0.6}
+                transmission={0.62}
+                thickness={0.85}
                 ior={1.45}
                 attenuationColor="#ea0029"
-                attenuationDistance={0.8}
+                attenuationDistance={0.9}
                 emissive="#3a0006"
-                emissiveIntensity={0.4}
+                emissiveIntensity={0.32}
               />
             ) : (
               <MeshTransmissionMaterial
                 samples={20}
                 resolution={1024}
                 transmission={1}
-                roughness={0.22}
-                thickness={0.6}
+                roughness={0.18}
+                thickness={1}
                 ior={1.38}
                 chromaticAberration={0}
                 anisotropy={0}
                 distortion={0}
                 distortionScale={0}
                 temporalDistortion={0}
-                color="#ffe2cf"
+                color="#ffd9cf"
                 attenuationColor="#ea0029"
-                attenuationDistance={2.6}
+                attenuationDistance={2.3}
               />
             )}
           </mesh>
+
+          <mesh scale={0.46} rotation={[0.3, 0.9, 0.2]}>
+            <icosahedronGeometry args={[1, 0]} />
+            <meshBasicMaterial color="#ffb8a8" transparent opacity={0.16} />
+          </mesh>
         </group>
       </Float>
+
+      {/* Orbiting red translucent shards */}
+      <group ref={shardBelt}>
+        {[
+          { pos: [1.95, 0.55, 0.35], rot: [0.5, 0.2, 0.8], scale: 0.46 },
+          { pos: [-1.7, -0.35, 0.65], rot: [0.2, 1.1, 0.2], scale: 0.34 },
+          { pos: [0.3, -1.55, -0.3], rot: [1.1, 0.4, 0.6], scale: 0.3 },
+        ].map((shard, i) => (
+          <mesh
+            key={i}
+            ref={(el) => { shardRefs.current[i] = el }}
+            position={shard.pos as [number, number, number]}
+            rotation={shard.rot as [number, number, number]}
+            scale={shard.scale}
+          >
+            <tetrahedronGeometry args={[1, 0]} />
+            {lite ? (
+              <meshPhysicalMaterial
+                color="#ef334b"
+                roughness={0.14}
+                clearcoat={1}
+                clearcoatRoughness={0.1}
+                transmission={0.5}
+                thickness={0.5}
+                ior={1.42}
+                attenuationColor="#ef334b"
+                attenuationDistance={0.75}
+              />
+            ) : (
+              <MeshTransmissionMaterial
+                samples={12}
+                resolution={512}
+                transmission={1}
+                roughness={0.12}
+                thickness={0.42}
+                ior={1.34}
+                chromaticAberration={0}
+                anisotropy={0}
+                distortion={0}
+                distortionScale={0}
+                temporalDistortion={0}
+                color="#ffd8cf"
+                attenuationColor="#ef334b"
+                attenuationDistance={1.4}
+              />
+            )}
+          </mesh>
+        ))}
+      </group>
+
+      {/* Thin spikes sharpen silhouette without touching backdrop */}
+      {[
+        { rot: [0, 0, Math.PI / 4], scale: [0.018, 2.6, 0.018] },
+        { rot: [Math.PI / 2.8, 0.4, 0], scale: [0.015, 2.1, 0.015] },
+        { rot: [0.6, Math.PI / 2, 0.35], scale: [0.012, 1.8, 0.012] },
+      ].map((spike, i) => (
+        <mesh
+          key={`spike-${i}`}
+          ref={(el) => { spikeRefs.current[i] = el }}
+          rotation={spike.rot as [number, number, number]}
+          scale={spike.scale as [number, number, number]}
+        >
+          <boxGeometry args={[1, 1, 1]} />
+          <meshBasicMaterial color="#ff5c57" transparent opacity={0.22} />
+        </mesh>
+      ))}
 
       {/* Outer thin ring — red accent */}
       <mesh ref={ring} rotation={[Math.PI / 2.4, 0, 0]}>
