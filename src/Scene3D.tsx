@@ -1,6 +1,6 @@
 import { useRef, useMemo, forwardRef, useImperativeHandle, useEffect, useState, Suspense } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { Environment, Float } from '@react-three/drei'
+import { Environment, Float, MeshTransmissionMaterial } from '@react-three/drei'
 import * as THREE from 'three'
 
 export type Scene3DHandle = {
@@ -326,10 +326,22 @@ function Sculpture({ progressRef, lite, theme }: SculptProps) {
         </group>
       </Float>
 
-      {/* Outer thin ring — red accent */}
+      {/* Outer ring — glass transmission material */}
       <mesh ref={ring} rotation={[Math.PI / 2.4, 0, 0]}>
-        <torusGeometry args={[2.6, 0.008, 16, lite ? 120 : 240]} />
-        <meshBasicMaterial color="#ea0029" />
+        <torusGeometry args={[2.2, 0.055, 32, lite ? 120 : 240]} />
+        <MeshTransmissionMaterial
+          backside
+          thickness={0.6}
+          roughness={0.1}
+          chromaticAberration={0.04}
+          anisotropy={0.3}
+          distortion={0.2}
+          distortionScale={0.4}
+          temporalDistortion={0.1}
+          ior={1.4}
+          color="#ffffff"
+          transmissionSampler
+        />
       </mesh>
 
       {/* Cinematic bokeh orbs */}
