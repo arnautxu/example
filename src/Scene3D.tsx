@@ -230,38 +230,32 @@ function Backdrop({ theme }: { theme: Theme }) {
 }
 
 function Sculpture({ progressRef, lite, theme }: SculptProps) {
-  const coreGroup = useRef<THREE.Group>(null!)
+  const helixGroup = useRef<THREE.Group>(null!)
   const ring = useRef<THREE.Mesh>(null!)
-  const shardBelt = useRef<THREE.Group>(null!)
-  const shardRefs = useRef<Array<THREE.Mesh | null>>([])
-  const spikeRefs = useRef<Array<THREE.Mesh | null>>([])
+  const ribbonRefs = useRef<Array<THREE.Mesh | null>>([])
+  const spineRefs = useRef<Array<THREE.Mesh | null>>([])
 
   useFrame((state, delta) => {
     const p = progressRef.current
     const t = state.clock.elapsedTime
 
-    if (coreGroup.current) {
-      coreGroup.current.rotation.y += delta * 0.22
-      coreGroup.current.rotation.x = Math.sin(t * 0.3) * 0.18 + p * Math.PI * 1.1
+    if (helixGroup.current) {
+      helixGroup.current.rotation.y += delta * 0.16
+      helixGroup.current.rotation.x = Math.sin(t * 0.24) * 0.12 + p * Math.PI * 0.9
       const s = 1 + Math.sin(t * 0.6) * 0.04 - p * 0.12
-      coreGroup.current.scale.setScalar(s)
+      helixGroup.current.scale.setScalar(s)
     }
 
-    if (shardBelt.current) {
-      shardBelt.current.rotation.y = -t * 0.28
-      shardBelt.current.rotation.z = Math.sin(t * 0.22) * 0.18
-    }
-
-    shardRefs.current.forEach((mesh, i) => {
+    ribbonRefs.current.forEach((mesh, i) => {
       if (!mesh) return
-      mesh.rotation.x += delta * (0.2 + i * 0.06)
-      mesh.rotation.y -= delta * (0.28 + i * 0.04)
+      mesh.rotation.z = Math.sin(t * 0.9 + i * 0.22) * 0.12
+      mesh.rotation.x = Math.cos(t * 0.55 + i * 0.18) * 0.08
     })
 
-    spikeRefs.current.forEach((mesh, i) => {
+    spineRefs.current.forEach((mesh, i) => {
       if (!mesh) return
-      mesh.rotation.z += delta * (0.35 + i * 0.05)
-      mesh.position.y += Math.sin(t * 0.9 + i * 1.4) * 0.0009
+      mesh.position.y += Math.sin(t * 1.1 + i * 1.7) * 0.0008
+      mesh.rotation.y += delta * (0.1 + i * 0.04)
     })
 
     if (ring.current) {
@@ -274,118 +268,91 @@ function Sculpture({ progressRef, lite, theme }: SculptProps) {
     <group>
       <Backdrop theme={theme} />
 
-      {/* Main translucent geometric core */}
+      {/* Helicoidal translucent column */}
       <Float speed={1.2} rotationIntensity={0.3} floatIntensity={0.5}>
-        <group ref={coreGroup}>
-          <mesh castShadow rotation={[Math.PI / 5, Math.PI / 4, 0]}>
-            <octahedronGeometry args={[1.5, 0]} />
-            {lite ? (
-              <meshPhysicalMaterial
-                color="#d91732"
-                metalness={0}
-                roughness={0.18}
-                clearcoat={1}
-                clearcoatRoughness={0.12}
-                transmission={0.62}
-                thickness={0.85}
-                ior={1.45}
-                attenuationColor="#ea0029"
-                attenuationDistance={0.9}
-                emissive="#3a0006"
-                emissiveIntensity={0.32}
-              />
-            ) : (
-              <MeshTransmissionMaterial
-                samples={20}
-                resolution={1024}
-                transmission={1}
-                roughness={0.18}
-                thickness={1}
-                ior={1.38}
-                chromaticAberration={0}
-                anisotropy={0}
-                distortion={0}
-                distortionScale={0}
-                temporalDistortion={0}
-                color="#ffd9cf"
-                attenuationColor="#ea0029"
-                attenuationDistance={2.3}
-              />
-            )}
-          </mesh>
+        <group ref={helixGroup}>
+          {[0, Math.PI * 0.66, Math.PI * 1.33].map((phase, strandIndex) =>
+            Array.from({ length: 15 }, (_, i) => {
+              const tSeg = i / 14
+              const angle = phase + tSeg * Math.PI * 2.1
+              const radius = 0.72 + Math.sin(tSeg * Math.PI) * 0.12
+              const x = Math.cos(angle) * radius
+              const y = -1.9 + tSeg * 3.8
+              const z = Math.sin(angle) * radius * 0.42
+              const rotY = angle + Math.PI / 2
+              const scaleY = 0.42 + Math.sin(tSeg * Math.PI) * 0.26
+              const refIndex = strandIndex * 15 + i
 
-          <mesh scale={0.46} rotation={[0.3, 0.9, 0.2]}>
-            <icosahedronGeometry args={[1, 0]} />
-            <meshBasicMaterial color="#ffb8a8" transparent opacity={0.16} />
-          </mesh>
+              return (
+                <mesh
+                  key={`${strandIndex}-${i}`}
+                  ref={(el) => { ribbonRefs.current[refIndex] = el }}
+                  position={[x, y, z]}
+                  rotation={[0, rotY, Math.PI / 10]}
+                  scale={[0.08, scaleY, 0.28]}
+                >
+                  <boxGeometry args={[1, 1, 1]} />
+                  {lite ? (
+                    <meshPhysicalMaterial
+                      color={strandIndex === 1 ? '#ff4a61' : '#d91732'}
+                      metalness={0}
+                      roughness={0.14}
+                      clearcoat={1}
+                      clearcoatRoughness={0.1}
+                      transmission={0.56}
+                      thickness={0.6}
+                      ior={1.42}
+                      attenuationColor="#ea0029"
+                      attenuationDistance={0.82}
+                      emissive="#320007"
+                      emissiveIntensity={0.22}
+                    />
+                  ) : (
+                    <MeshTransmissionMaterial
+                      samples={12}
+                      resolution={512}
+                      transmission={1}
+                      roughness={0.1}
+                      thickness={0.7}
+                      ior={1.34}
+                      chromaticAberration={0}
+                      anisotropy={0}
+                      distortion={0}
+                      distortionScale={0}
+                      temporalDistortion={0}
+                      color={strandIndex === 1 ? '#ffd5d0' : '#ffd9cf'}
+                      attenuationColor={strandIndex === 1 ? '#ff3d56' : '#ea0029'}
+                      attenuationDistance={1.7}
+                    />
+                  )}
+                </mesh>
+              )
+            }),
+          )}
+
+          {[
+            { pos: [0, 0, 0], scale: [0.12, 3.5, 0.12] },
+            { pos: [0, 0.18, 0], scale: [0.05, 2.8, 0.05] },
+            { pos: [0, -0.15, 0], scale: [0.22, 0.32, 0.22] },
+          ].map((spine, i) => (
+            <mesh
+              key={`spine-${i}`}
+              ref={(el) => { spineRefs.current[i] = el }}
+              position={spine.pos as [number, number, number]}
+              scale={spine.scale as [number, number, number]}
+            >
+              <cylinderGeometry args={[1, 1, 1, lite ? 10 : 18]} />
+              {i === 0 ? (
+                <meshBasicMaterial color="#ff6b62" transparent opacity={0.16} />
+              ) : i === 1 ? (
+                <meshBasicMaterial color="#ffd2c2" transparent opacity={0.12} />
+              ) : (
+                <meshBasicMaterial color="#ff8f79" transparent opacity={0.2} />
+              )}
+            </mesh>
+          ))}
         </group>
       </Float>
-
-      {/* Orbiting red translucent shards */}
-      <group ref={shardBelt}>
-        {[
-          { pos: [1.95, 0.55, 0.35], rot: [0.5, 0.2, 0.8], scale: 0.46 },
-          { pos: [-1.7, -0.35, 0.65], rot: [0.2, 1.1, 0.2], scale: 0.34 },
-          { pos: [0.3, -1.55, -0.3], rot: [1.1, 0.4, 0.6], scale: 0.3 },
-        ].map((shard, i) => (
-          <mesh
-            key={i}
-            ref={(el) => { shardRefs.current[i] = el }}
-            position={shard.pos as [number, number, number]}
-            rotation={shard.rot as [number, number, number]}
-            scale={shard.scale}
-          >
-            <tetrahedronGeometry args={[1, 0]} />
-            {lite ? (
-              <meshPhysicalMaterial
-                color="#ef334b"
-                roughness={0.14}
-                clearcoat={1}
-                clearcoatRoughness={0.1}
-                transmission={0.5}
-                thickness={0.5}
-                ior={1.42}
-                attenuationColor="#ef334b"
-                attenuationDistance={0.75}
-              />
-            ) : (
-              <MeshTransmissionMaterial
-                samples={12}
-                resolution={512}
-                transmission={1}
-                roughness={0.12}
-                thickness={0.42}
-                ior={1.34}
-                chromaticAberration={0}
-                anisotropy={0}
-                distortion={0}
-                distortionScale={0}
-                temporalDistortion={0}
-                color="#ffd8cf"
-                attenuationColor="#ef334b"
-                attenuationDistance={1.4}
-              />
-            )}
-          </mesh>
-        ))}
-      </group>
-
-      {/* Thin spikes sharpen silhouette without touching backdrop */}
-      {[
-        { rot: [0, 0, Math.PI / 4], scale: [0.018, 2.6, 0.018] },
-        { rot: [Math.PI / 2.8, 0.4, 0], scale: [0.015, 2.1, 0.015] },
-        { rot: [0.6, Math.PI / 2, 0.35], scale: [0.012, 1.8, 0.012] },
-      ].map((spike, i) => (
-        <mesh
-          key={`spike-${i}`}
-          ref={(el) => { spikeRefs.current[i] = el }}
-          rotation={spike.rot as [number, number, number]}
-          scale={spike.scale as [number, number, number]}
-        >
-          <boxGeometry args={[1, 1, 1]} />
-          <meshBasicMaterial color="#ff5c57" transparent opacity={0.22} />
-        </mesh>
-      ))}
 
       {/* Outer thin ring — red accent */}
       <mesh ref={ring} rotation={[Math.PI / 2.4, 0, 0]}>
